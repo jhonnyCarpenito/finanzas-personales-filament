@@ -8,6 +8,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -74,6 +75,11 @@ class UserResource extends Resource
                     ->label('Admin')
                     ->boolean()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('blocked_at')
+                    ->label('Bloqueado')
+                    ->boolean()
+                    ->getStateUsing(fn (User $record): bool => $record->isBlocked())
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('transactions_count')
                     ->label('Transacciones')
                     ->counts('transactions')
@@ -90,10 +96,52 @@ class UserResource extends Resource
                     ->placeholder('Todos')
                     ->trueLabel('Administradores')
                     ->falseLabel('Usuarios Normales'),
+                Tables\Filters\TernaryFilter::make('blocked')
+                    ->label('Estado')
+                    ->placeholder('Todos')
+                    ->trueLabel('Bloqueados')
+                    ->falseLabel('Activos')
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('blocked_at'),
+                        false: fn ($query) => $query->whereNull('blocked_at'),
+                    ),
             ])
             ->actions([
+                Tables\Actions\Action::make('block')
+                    ->label('Bloquear')
+                    ->icon('heroicon-o-lock-closed')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Bloquear Usuario')
+                    ->modalDescription('¿Estás seguro de bloquear este usuario? No podrá acceder al sistema.')
+                    ->action(function (User $record) {
+                        $record->block();
+                        Notification::make()
+                            ->success()
+                            ->title('Usuario bloqueado')
+                            ->body('El usuario ha sido bloqueado exitosamente.')
+                            ->send();
+                    })
+                    ->visible(fn (User $record): bool => ! $record->isBlocked() && ! $record->is_admin),
+                Tables\Actions\Action::make('unblock')
+                    ->label('Desbloquear')
+                    ->icon('heroicon-o-lock-open')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Desbloquear Usuario')
+                    ->modalDescription('¿Estás seguro de desbloquear este usuario?')
+                    ->action(function (User $record) {
+                        $record->unblock();
+                        Notification::make()
+                            ->success()
+                            ->title('Usuario desbloqueado')
+                            ->body('El usuario ha sido desbloqueado exitosamente.')
+                            ->send();
+                    })
+                    ->visible(fn (User $record): bool => $record->isBlocked()),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn (User $record): bool => ! $record->is_admin),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

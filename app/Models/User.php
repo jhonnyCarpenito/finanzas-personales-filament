@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'blocked_at',
     ];
 
     /**
@@ -48,11 +49,36 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'blocked_at' => 'datetime',
         ];
     }
 
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Verificar si el usuario está bloqueado
+     */
+    public function isBlocked(): bool
+    {
+        return $this->blocked_at !== null;
+    }
+
+    /**
+     * Bloquear el usuario
+     */
+    public function block(): void
+    {
+        $this->update(['blocked_at' => now()]);
+    }
+
+    /**
+     * Desbloquear el usuario
+     */
+    public function unblock(): void
+    {
+        $this->update(['blocked_at' => null]);
     }
 }
