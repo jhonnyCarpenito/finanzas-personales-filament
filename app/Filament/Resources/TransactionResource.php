@@ -71,7 +71,11 @@ class TransactionResource extends Resource
                             ->native(false),
                         Forms\Components\Select::make('tags')
                             ->label('Etiquetas')
-                            ->relationship('tags', 'name')
+                            ->relationship(
+                                'tags',
+                                'name',
+                                fn (Builder $query) => $query->forUser(auth()->id())
+                            )
                             ->multiple()
                             ->preload()
                             ->createOptionForm([
@@ -90,7 +94,15 @@ class TransactionResource extends Resource
                                         'gray' => 'Gris',
                                     ])
                                     ->native(false),
-                            ]),
+                            ])
+                            ->createOptionUsing(function (array $data) {
+                                // Usuario normal crea tags personales, admin puede crear globales
+                                return Tag::create([
+                                    'name' => $data['name'],
+                                    'color' => $data['color'] ?? null,
+                                    'user_id' => auth()->id(), // Tags creadas desde transacciones son personales
+                                ])->id;
+                            }),
                         Forms\Components\Hidden::make('user_id')
                             ->default(auth()->id()),
                     ]),
