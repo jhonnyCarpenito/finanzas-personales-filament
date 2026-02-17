@@ -15,6 +15,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class TransactionResource extends Resource
 {
@@ -147,6 +148,27 @@ class TransactionResource extends Resource
                     ->alignEnd(),
             ])
             ->filters([
+                Filter::make('month')
+                    ->label('Mes')
+                    ->form([
+                        Forms\Components\Select::make('month')
+                            ->label('Mes')
+                            ->options(static::getMonthFilterOptions())
+                            ->searchable()
+                            ->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        $month = $data['month'] ?? null;
+
+                        if (! $month) {
+                            return $query;
+                        }
+
+                        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+                        $end = (clone $start)->endOfMonth();
+
+                        return $query->whereBetween('date', [$start->toDateString(), $end->toDateString()]);
+                    }),
                 SelectFilter::make('type')
                     ->label('Tipo')
                     ->options([
@@ -182,6 +204,27 @@ class TransactionResource extends Resource
                 ]),
             ])
             ->defaultSort('date', 'desc');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected static function getMonthFilterOptions(int $monthsBack = 24): array
+    {
+        $options = [];
+
+        $cursor = now()->startOfMonth();
+
+        for ($i = 0; $i < $monthsBack; $i++) {
+            $value = $cursor->format('Y-m');
+            $label = $cursor->translatedFormat('F Y'); // e.g. "febrero 2026"
+
+            $options[$value] = ucfirst($label);
+
+            $cursor->subMonth();
+        }
+
+        return $options;
     }
 
     public static function getRelations(): array
