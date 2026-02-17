@@ -169,6 +169,16 @@ class TransactionResource extends Resource
 
                         return $query->whereBetween('date', [$start->toDateString(), $end->toDateString()]);
                     }),
+                SelectFilter::make('tags')
+                    ->label('Etiquetas')
+                    ->relationship(
+                        'tags',
+                        'name',
+                        fn (Builder $query) => $query->forUser((int) auth()->id())
+                    )
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
                 SelectFilter::make('type')
                     ->label('Tipo')
                     ->options([
