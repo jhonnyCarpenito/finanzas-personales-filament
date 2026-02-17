@@ -9,23 +9,23 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class AdminUserDataSeeder extends Seeder
+class TestUserDataSeeder extends Seeder
 {
     /**
-     * Pobla la base de datos con transacciones de ejemplo para el usuario admin.
+     * Crea transacciones de ejemplo para el usuario de prueba (solo si aún no tiene).
      */
     public function run(): void
     {
-        $admin = User::where('email', 'admin@admin.com')->first();
+        $user = User::where('email', TestUserSeeder::TEST_USER_EMAIL)->first();
 
-        if (! $admin) {
-            $this->command->warn('Usuario admin@admin.com no encontrado. Ejecuta primero AdminUserSeeder.');
+        if (! $user) {
+            $this->command->warn('Usuario de prueba no encontrado. Ejecuta primero TestUserSeeder.');
 
             return;
         }
 
-        if ($admin->transactions()->count() > 0) {
-            $this->command->info('El admin ya tiene transacciones. Se omiten datos de ejemplo.');
+        if ($user->transactions()->count() > 0) {
+            $this->command->info('El usuario de prueba ya tiene transacciones. Se omiten datos de ejemplo.');
 
             return;
         }
@@ -38,7 +38,7 @@ class AdminUserDataSeeder extends Seeder
 
         $transactions = Transaction::factory()
             ->count(60)
-            ->for($admin)
+            ->for($user)
             ->sequence(
                 ['type' => 'income'],
                 ['type' => 'income'],
@@ -57,6 +57,6 @@ class AdminUserDataSeeder extends Seeder
             }
         }
 
-        $this->command->info('Transacciones de ejemplo creadas para admin@admin.com.');
+        $this->command->info('Transacciones de ejemplo creadas para usuario de prueba ('.TestUserSeeder::TEST_USER_EMAIL.').');
     }
 }

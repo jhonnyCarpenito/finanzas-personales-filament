@@ -129,7 +129,7 @@ Elige la app (ej. `finanzas-personales`) cuando lo pida. CapRover enviará el co
 
 1. Abre `https://tu-dominio-asignado/admin`.
 2. Deberías ver la pantalla de login de Filament.
-3. Los seeders se ejecutan al arrancar el contenedor (admin, tags globales y, la primera vez, transacciones de ejemplo). Inicia sesión con `admin@admin.com` / `password` y cambia la contraseña en producción.
+3. Los seeders se ejecutan al arrancar (admin, usuario de prueba, tags globales y transacciones de ejemplo para el usuario de prueba). Cuentas: **Admin** `admin@admin.com` / `password`; **Usuario de prueba** (sin permisos admin) `prueba@ejemplo.com` / `password`. Cambia las contraseñas en producción.
 
 Si algo falla, revisa los **logs** de la app en CapRover (Logs) y que todas las variables de entorno estén bien (sobre todo `APP_KEY` y `APP_URL`).
 
@@ -152,7 +152,7 @@ Si algo falla, revisa los **logs** de la app en CapRover (Logs) y que todas las 
 
 - **Error 500 / blanco:** Revisa que `APP_KEY` esté definida y que la BD sea accesible (variables `DB_*`). Mira los logs en CapRover.
 - **Estilos/JS no cargan:** El Dockerfile hace `npm run build`; comprueba que el deploy haya terminado sin errores en la etapa de frontend.
-- **Migraciones y seeders:** Se ejecutan al arrancar el contenedor (`docker/entrypoint.sh`). Los seeders son idempotentes (admin y tags no se duplican; las transacciones de ejemplo solo se crean la primera vez). Si cambias de SQLite a MySQL, crea la base de datos en MySQL antes del primer deploy.
+- **Migraciones y seeders:** Se ejecutan al arrancar el contenedor (`docker/entrypoint.sh`). Son idempotentes: admin y usuario de prueba se actualizan por email; tags no se duplican; las transacciones de ejemplo solo se crean la primera vez para el usuario de prueba. Si cambias de SQLite a MySQL, crea la base de datos en MySQL antes del primer deploy.
 - **SQLite en volumen:** Si usas SQLite, el volumen debe montar el directorio donde Laravel escribe el archivo (por ejemplo `/var/www/html/database`); así el archivo `.sqlite` persiste entre reinicios.
 
 Con estos pasos deberías tener el proyecto corriendo en CapRover. Si quieres, el siguiente paso puede ser configurar un worker para colas (`queue:work`) como servicio aparte en CapRover.
