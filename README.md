@@ -17,6 +17,7 @@ Sistema SaaS de gestión de finanzas personales con panel de administración mod
 - [Base de datos](#base-de-datos)
 - [Seguridad y permisos](#seguridad-y-permisos)
 - [Comandos útiles](#comandos-útiles)
+- [Despliegue en CapRover](#despliegue-en-caprover)
 - [Especificaciones](#especificaciones)
 - [Licencia](#licencia)
 
@@ -233,6 +234,12 @@ Sesiones, caché y colas usan **database** por defecto (tablas `sessions`, `cach
 | Corregir estilo | `./vendor/bin/pint` |
 | Tests | `php artisan test` |
 | Build frontend | `npm run build` |
+
+---
+
+## Despliegue en CapRover
+
+El proyecto incluye **Dockerfile**, configuración **Nginx** y **captain-definition** para desplegar en [CapRover](https://caprover.com/). Guía paso a paso: **[DEPLOYMENT-CAPROVER.md](DEPLOYMENT-CAPROVER.md)**.
 
 ---
 
