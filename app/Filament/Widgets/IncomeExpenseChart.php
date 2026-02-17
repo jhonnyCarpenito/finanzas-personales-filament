@@ -28,11 +28,15 @@ class IncomeExpenseChart extends ChartWidget
             $query->where('user_id', $userId);
         }
 
-        // Agrupar por mes - Compatible con SQLite
+        // Expresión de mes según el driver (SQLite vs MySQL/MariaDB)
+        $monthExpr = DB::getDriverName() === 'sqlite'
+            ? "CAST(strftime('%m', date) AS INTEGER)"
+            : 'MONTH(date)';
+
         $monthlyIncome = (clone $query)
             ->where('type', 'income')
             ->select(
-                DB::raw("CAST(strftime('%m', date) AS INTEGER) as month"),
+                DB::raw("{$monthExpr} as month"),
                 DB::raw('SUM(amount) as total')
             )
             ->groupBy('month')
@@ -42,7 +46,7 @@ class IncomeExpenseChart extends ChartWidget
         $monthlyExpense = (clone $query)
             ->where('type', 'expense')
             ->select(
-                DB::raw("CAST(strftime('%m', date) AS INTEGER) as month"),
+                DB::raw("{$monthExpr} as month"),
                 DB::raw('SUM(amount) as total')
             )
             ->groupBy('month')
