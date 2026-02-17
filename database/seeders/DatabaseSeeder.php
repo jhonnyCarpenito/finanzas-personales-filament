@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TagSeeder::class,
             AdminUserSeeder::class,
+            AdminUserDataSeeder::class,
         ]);
     }
 }
