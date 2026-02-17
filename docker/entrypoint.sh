@@ -14,6 +14,9 @@ php artisan migrate --force --no-interaction || true
 # Seeders: admin, tags globales y (solo la primera vez) transacciones de ejemplo
 php artisan db:seed --force --no-interaction || true
 
+# Artisan se ejecuta como root; asegurar que storage y cache sean escribibles por www-data (PHP-FPM/Nginx)
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
 # Cache config and routes (optional; uncomment if env is fully set at build time)
 # php artisan config:cache
 # php artisan route:cache

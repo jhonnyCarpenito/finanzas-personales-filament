@@ -151,6 +151,8 @@ Si algo falla, revisa los **logs** de la app en CapRover (Logs) y que todas las 
 ## Solución de problemas
 
 - **Error 500 / blanco:** Revisa que `APP_KEY` esté definida y que la BD sea accesible (variables `DB_*`). Mira los logs en CapRover.
+- **Permission denied en `storage/logs/laravel.log`:** El entrypoint corrige permisos tras migrate/seed (`chown www-data`). Si usas una imagen antigua, vuelve a desplegar para que se aplique.
+- **"The intl PHP extension is required":** La imagen del Dockerfile ya incluye la extensión `intl` (necesaria para Filament). Vuelve a construir la imagen y redesplegar.
 - **Estilos/JS no cargan:** El Dockerfile hace `npm run build`; comprueba que el deploy haya terminado sin errores en la etapa de frontend.
 - **Migraciones y seeders:** Se ejecutan al arrancar el contenedor (`docker/entrypoint.sh`). Son idempotentes: admin y usuario de prueba se actualizan por email; tags no se duplican; las transacciones de ejemplo solo se crean la primera vez para el usuario de prueba. Si cambias de SQLite a MySQL, crea la base de datos en MySQL antes del primer deploy.
 - **SQLite en volumen:** Si usas SQLite, el volumen debe montar el directorio donde Laravel escribe el archivo (por ejemplo `/var/www/html/database`); así el archivo `.sqlite` persiste entre reinicios.

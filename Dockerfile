@@ -38,7 +38,7 @@ RUN composer dump-autoload --optimize --no-dev
 # ============================================
 FROM php:8.2-fpm-bookworm
 
-# System deps + PHP extensions for Laravel
+# System deps + PHP extensions for Laravel + Filament (intl)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     libpng-dev \
@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev \
     libsqlite3-dev \
     default-libmysqlclient-dev \
+    libicu-dev \
     zip \
     unzip \
     curl \
@@ -61,6 +62,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gd \
         zip \
         opcache \
+        intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Nginx runs as www-data; PHP-FPM also
