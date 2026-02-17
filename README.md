@@ -1,158 +1,256 @@
 # Sistema de Gestión de Finanzas Personales
 
-Sistema SaaS de gestión de finanzas personales desarrollado con **Laravel 12** y **FilamentPHP 3**.
+Sistema SaaS de gestión de finanzas personales con panel de administración moderno, multi-usuario y multi-tenant. Desarrollado con **Laravel 12** y **FilamentPHP 3**.
 
-## 🚀 Características
+---
 
-- ✅ Gestión completa de transacciones (ingresos y egresos)
-- ✅ Sistema de etiquetas globales y personales:
-  - **Tags Globales**: Creadas por administradores, disponibles para todos
-  - **Tags Personales**: Cada usuario puede crear y gestionar sus propias tags
-- ✅ Dashboard con estadísticas en tiempo real:
-  - Saldo total
-  - Ingresos del mes
-  - Gastos del mes
-  - Gráfico de ingresos vs egresos por mes
-- ✅ Sistema de roles y permisos:
-  - **Usuario Regular**: Gestiona sus transacciones y tags personales
-  - **Administrador**: Acceso completo + gestión de usuarios y tags globales
-- ✅ Multi-tenancy: cada usuario solo ve sus propias transacciones
-- ✅ Filtros avanzados por tipo y rango de fechas
-- ✅ Interfaz moderna y responsiva con Filament
+## Tabla de contenidos
 
-## 📋 Requisitos
+- [Descripción](#descripción)
+- [Características](#características)
+- [Stack tecnológico](#stack-tecnológico)
+- [Requisitos](#requisitos)
+- [Instalación](#instalación)
+- [Uso](#uso)
+- [Credenciales por defecto](#credenciales-por-defecto)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Base de datos](#base-de-datos)
+- [Seguridad y permisos](#seguridad-y-permisos)
+- [Comandos útiles](#comandos-útiles)
+- [Especificaciones](#especificaciones)
+- [Licencia](#licencia)
 
-- PHP 8.2+
-- Composer
-- Base de datos SQLite (por defecto) o MySQL
+---
 
-## 🛠️ Instalación
+## Descripción
 
-El proyecto ya está instalado y configurado. Para iniciar el servidor de desarrollo:
+Aplicación web que permite a los usuarios registrar **ingresos** y **egresos**, clasificarlos con **etiquetas** (tags) y consultar un **dashboard** con estadísticas y gráficos. Los administradores pueden gestionar usuarios, etiquetas globales y ver todas las transacciones del sistema. El diseño sigue un modelo **multi-tenant**: cada usuario solo accede a sus propios datos, salvo los administradores.
+
+El proyecto fue implementado según las especificaciones del documento **`app_spec.md`** (Tech Spec).
+
+---
+
+## Características
+
+### Gestión de transacciones
+- CRUD completo de transacciones (ingresos y egresos).
+- Campos: concepto, monto, fecha, tipo y etiquetas (múltiples por transacción).
+- Búsqueda por concepto y filtros avanzados:
+  - **Por mes**: selector de mes/año (por defecto: mes actual).
+  - **Por etiquetas**: una o varias etiquetas a la vez.
+  - **Por tipo**: ingreso o egreso.
+  - **Por rango de fechas**: desde / hasta.
+
+### Sistema de etiquetas
+- **Tags globales**: creadas por administradores y disponibles para todos los usuarios (solo lectura para usuarios regulares).
+- **Tags personales**: cada usuario puede crear y gestionar sus propias etiquetas.
+- Colores y nombres configurables; creación de tags desde el formulario de transacciones.
+
+### Dashboard
+- **Tarjetas de estadísticas**: saldo total, ingresos del mes y gastos del mes.
+- **Gráfico**: ingresos vs egresos por mes (año actual).
+
+### Roles y permisos
+- **Usuario regular**: gestiona sus transacciones y tags personales; usa tags globales en solo lectura.
+- **Administrador**: gestión de usuarios (crear, editar, bloquear), tags globales y visualización de todas las transacciones.
+
+### Otros
+- Interfaz responsiva con Filament (Tailwind CSS, Vite).
+- Bloqueo de usuarios: los administradores pueden bloquear cuentas; el middleware impide el acceso y cierra sesión si el usuario está bloqueado.
+- Código con tipos estrictos en PHP y estándares PSR-12 (Laravel Pint).
+
+---
+
+## Stack tecnológico
+
+| Tecnología        | Uso                          |
+|-------------------|------------------------------|
+| **PHP** 8.2+      | Backend                      |
+| **Laravel** 12    | Framework                    |
+| **Filament** 3    | Panel de administración      |
+| **SQLite** / MySQL| Base de datos (configurable) |
+| **Vite** + Tailwind CSS 4 | Frontend (assets)   |
+| **Laravel Pint**  | Estilo de código (PSR-12)    |
+
+---
+
+## Requisitos
+
+- **PHP** ≥ 8.2 (extensiones: `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `curl`; para SQLite: `pdo_sqlite`)
+- **Composer** 2.x
+- **Node.js** y **npm** (para compilar assets con Vite)
+- **Base de datos**: SQLite (por defecto) o MySQL / PostgreSQL
+
+---
+
+## Instalación
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <url-del-repositorio> finanzas-personales-filament
+cd finanzas-personales-filament
+```
+
+### 2. Dependencias PHP
+
+```bash
+composer install
+```
+
+### 3. Variables de entorno
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Configura en `.env` al menos:
+- `APP_NAME`, `APP_URL` (para producción)
+- `DB_CONNECTION`: `sqlite` por defecto; si usas MySQL, define `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+
+Para **SQLite** (por defecto):
+
+```bash
+touch database/database.sqlite
+```
+
+### 4. Base de datos
+
+```bash
+php artisan migrate --seed
+```
+
+### 5. Assets (frontend)
+
+```bash
+npm install
+npm run build
+```
+
+En desarrollo puedes usar `npm run dev` en lugar de `npm run build`.
+
+### 6. Servidor de desarrollo
 
 ```bash
 php artisan serve
 ```
 
-Accede a la aplicación en: `http://localhost:8000/admin`
+La aplicación quedará disponible en `http://localhost:8000`. El panel de administración está en:
 
-## 👤 Credenciales de Acceso
+**`http://localhost:8000/admin`**
 
-### Usuario Administrador
-- **Email:** admin@admin.com
-- **Password:** password
+---
 
-## 🔐 Sistema de Permisos
+## Uso
 
-### Usuario Regular
-- ✅ Crear, editar y eliminar sus propias transacciones
-- ✅ Crear y editar sus propias tags personales
-- ✅ Usar tags globales del sistema (solo lectura)
-- ❌ No puede ver transacciones de otros usuarios
-- ❌ No puede editar/eliminar tags globales
+- **Usuarios regulares**: iniciar sesión → Dashboard con estadísticas → Transacciones (crear, editar, eliminar, filtrar por mes/tags/tipo/fechas) → Etiquetas (solo las propias).
+- **Administradores**: además pueden gestionar usuarios (incluido bloqueo), tags globales y ver todas las transacciones.
 
-### Administrador
-- ✅ Ver y gestionar todos los usuarios del sistema
-- ✅ Crear, editar y eliminar tags globales
-- ✅ Ver todas las transacciones del sistema
-- ✅ Gestionar tags globales y personales de todos los usuarios
-- ✅ Crear usuarios normales y administradores
+Al entrar en Transacciones, por defecto se muestran las del **mes actual**; puedes cambiar el mes, añadir filtros por etiquetas o por tipo y rango de fechas.
 
-## 🗂️ Estructura del Proyecto
+---
 
-### Modelos y Relaciones
-- **User**: Contiene el campo `is_admin` para identificar administradores
-- **Transaction**: Gestiona ingresos y egresos con relación a User y Tags
-- **Tag**: Etiquetas para categorizar transacciones
+## Credenciales por defecto
 
-### Recursos Filament
-- **TransactionResource**: CRUD completo de transacciones con:
-  - Formulario con validación
-  - Tabla con búsqueda y filtros
-  - Scope de seguridad (multi-tenancy)
-  - Selector de tags (globales + personales del usuario)
-- **TagResource**: Gestión de etiquetas con:
-  - Indicador de tags globales vs personales
-  - Toggle para admin: crear tags globales
-  - Filtros por tipo de tag (solo admin)
-- **UserResource**: Gestión de usuarios (solo admin)
-  - Crear usuarios normales y administradores
-  - Ver estadísticas de transacciones por usuario
-  - Filtros por tipo de usuario
+Tras ejecutar los seeders, existe un usuario administrador de prueba:
 
-### Widgets del Dashboard
-- **FinanceStatsOverview**: Tarjetas con estadísticas clave
-- **IncomeExpenseChart**: Gráfico de barras comparativo por mes
+| Rol   | Email           | Contraseña |
+|-------|-----------------|------------|
+| Admin | `admin@admin.com` | `password` |
 
-### Políticas de Seguridad
-- **TransactionPolicy**: Solo el dueño puede editar/eliminar sus transacciones
-- **TagPolicy**: 
-  - Usuarios normales: pueden editar solo sus tags personales
-  - Administradores: pueden editar todas las tags (globales y personales)
-  - Tags globales son de solo lectura para usuarios normales
-- **UserPolicy**: Solo administradores pueden gestionar usuarios
+**Importante:** cambia esta contraseña en entornos de producción.
 
-## 📊 Base de Datos
+---
 
-### Tablas
-- `users`: Usuarios del sistema con campo `is_admin`
-- `transactions`: Transacciones con tipo, monto, concepto y fecha
-- `tags`: Etiquetas con nombre, color y `user_id` (null = global)
-- `tag_transaction`: Tabla pivot para relación muchos a muchos
+## Estructura del proyecto
 
-### Seeders Incluidos
-- **TagSeeder**: 9 tags globales predefinidas (Salario, Freelance, Vivienda, Comida, etc.)
-- **AdminUserSeeder**: Usuario administrador de prueba
+### Modelos (`app/Models`)
+- **User**: autenticación, `is_admin`, `blocked_at`; relación `transactions()`.
+- **Transaction**: `user_id`, `type`, `amount`, `concept`, `date`; relaciones `user()`, `tags()`; casts para `date` y `amount`.
+- **Tag**: `name`, `color`, `user_id` (null = global); relación `transactions()`; scopes `global()` y `forUser($userId)`.
 
-## 🎨 Características Técnicas
+### Recursos Filament (`app/Filament/Resources`)
+- **TransactionResource**: CRUD de transacciones; scope multi-tenant en `getEloquentQuery()`; filtros (mes, etiquetas, tipo, rango de fechas); selector de tags con creación al vuelo.
+- **TagResource**: gestión de etiquetas; indicador global/personal; solo admin puede crear/editar tags globales.
+- **UserResource**: gestión de usuarios (solo admin); creación de usuarios y administradores; estadísticas por usuario.
 
-- ✅ PHP 8.2+ con tipos estrictos (`declare(strict_types=1)`)
-- ✅ Código siguiendo estándares PSR-12
-- ✅ Políticas de Laravel para autorización
-- ✅ Índices de BD para optimizar consultas
-- ✅ Validación de formularios
-- ✅ Manejo preciso de decimales para montos
+### Widgets del Dashboard (`app/Filament/Widgets`)
+- **FinanceStatsOverview**: tarjetas de saldo total, ingresos del mes y gastos del mes.
+- **IncomeExpenseChart**: gráfico de barras ingresos vs egresos por mes.
 
-## 📝 Comandos Útiles
+### Políticas (`app/Policies`)
+- **TransactionPolicy**: solo el dueño puede ver/editar/eliminar sus transacciones.
+- **TagPolicy**: usuarios normales solo editan sus tags personales; admins editan todas; tags globales en solo lectura para no-admin.
+- **UserPolicy**: solo administradores pueden gestionar usuarios.
 
-### Re-ejecutar migraciones y seeders
-```bash
-php artisan migrate:fresh --seed
-```
+### Middleware
+- **CheckUserBlocked**: cierra sesión y redirige si el usuario tiene `blocked_at` definido.
 
-### Verificar estilo de código
-```bash
-./vendor/bin/pint --test
-```
+### Seeders (`database/seeders`)
+- **TagSeeder**: 9 tags globales (Salario, Freelance, Inversiones; Vivienda, Comida, Transporte, Servicios, Ocio, Salud).
+- **AdminUserSeeder**: usuario `admin@admin.com` con `is_admin = true`.
+- **AdminUserDataSeeder**: transacciones de ejemplo para el admin (usa `TransactionFactory`).
 
-### Corregir estilo de código
-```bash
-./vendor/bin/pint
-```
+### Factories (`database/factories`)
+- **UserFactory**: usuario de prueba.
+- **TransactionFactory**: transacciones con estados `income()` y `expense()`.
 
-### Ver rutas de Filament
-```bash
-php artisan route:list --path=admin
-```
+---
 
-## 🔧 Desarrollo
+## Base de datos
 
-El proyecto está completamente funcional y listo para usar. Puedes:
+### Tablas principales
+- **users**: id, name, email, password, is_admin, blocked_at, timestamps, email_verified_at, remember_token.
+- **tags**: id, name, color, user_id (nullable), timestamps.
+- **transactions**: id, user_id, type, amount, concept, date, timestamps; índice en (user_id, date).
+- **tag_transaction**: transaction_id, tag_id; clave primaria (transaction_id, tag_id).
 
-### Como Usuario Regular:
-1. Iniciar sesión
-2. Crear transacciones usando tags globales o propias
-3. Crear tus propias tags personales
-4. Ver estadísticas de tus finanzas
-5. Filtrar y buscar tus transacciones
+Sesiones, caché y colas usan **database** por defecto (tablas `sessions`, `cache`, `jobs` según migraciones de Laravel).
 
-### Como Administrador:
-1. Gestionar usuarios del sistema
-2. Crear y editar tags globales
-3. Ver todas las transacciones del sistema
-4. Gestionar tags de cualquier usuario
-5. Crear otros administradores
+---
 
-## 📄 Licencia
+## Seguridad y permisos
 
-Este proyecto fue desarrollado según las especificaciones del archivo `app_spec.md`.
+- **Multi-tenancy**: en `TransactionResource::getEloquentQuery()` se aplica `where('user_id', auth()->id())` para usuarios no administradores.
+- **Políticas**: todas las acciones sobre transacciones, tags y usuarios pasan por las policies correspondientes.
+- **Bloqueo**: el middleware `CheckUserBlocked` impide el acceso a usuarios bloqueados y cierra su sesión.
+- **Contraseñas**: hasheadas con bcrypt (configuración por defecto de Laravel).
+
+---
+
+## Comandos útiles
+
+| Acción | Comando |
+|--------|--------|
+| Servidor de desarrollo | `php artisan serve` |
+| Desarrollo (servidor + Vite + cola + logs) | `composer run dev` |
+| Migraciones desde cero + seeders | `php artisan migrate:fresh --seed` |
+| Solo seeders | `php artisan db:seed` |
+| Solo datos del admin | `php artisan db:seed --class=AdminUserDataSeeder` |
+| Rutas del panel | `php artisan route:list --path=admin` |
+| Verificar estilo (Pint) | `./vendor/bin/pint --test` |
+| Corregir estilo | `./vendor/bin/pint` |
+| Tests | `php artisan test` |
+| Build frontend | `npm run build` |
+
+---
+
+## Especificaciones
+
+El diseño y la implementación siguen el documento **`app_spec.md`** (Tech Spec), que define:
+
+- Esquema de base de datos (users, tags, transactions, tag_transaction).
+- Modelos Eloquent y relaciones.
+- Recursos Filament (TransactionResource con formulario, tabla y filtros).
+- Widgets del dashboard (estadísticas y gráfico ingresos/egresos).
+- Políticas de autorización (Transaction, Tag, User).
+- Seeders iniciales (tags globales y usuario admin).
+
+La versión actual del proyecto utiliza **Laravel 12** (el spec original menciona Laravel 11) y añade mejoras como filtro por mes (por defecto mes actual), filtro por una o varias etiquetas, bloqueo de usuarios y seeder de datos de ejemplo para el admin.
+
+---
+
+## Licencia
+
+Este proyecto fue desarrollado según las especificaciones del archivo `app_spec.md`. Consulta el repositorio o al autor para más detalles de licencia.
