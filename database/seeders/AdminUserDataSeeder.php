@@ -24,6 +24,12 @@ class AdminUserDataSeeder extends Seeder
             return;
         }
 
+        if ($admin->transactions()->count() > 0) {
+            $this->command->info('El admin ya tiene transacciones. Se omiten datos de ejemplo.');
+
+            return;
+        }
+
         $tags = Tag::global()->pluck('id')->toArray();
 
         if (empty($tags)) {

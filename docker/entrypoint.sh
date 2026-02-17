@@ -11,6 +11,9 @@ fi
 # Migraciones (--force para producción sin confirmación)
 php artisan migrate --force --no-interaction || true
 
+# Seeders: admin, tags globales y (solo la primera vez) transacciones de ejemplo
+php artisan db:seed --force --no-interaction || true
+
 # Cache config and routes (optional; uncomment if env is fully set at build time)
 # php artisan config:cache
 # php artisan route:cache
