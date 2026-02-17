@@ -7,14 +7,13 @@ namespace Database\Seeders;
 use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class TestUserDataSeeder extends Seeder
 {
     /**
      * Crea transacciones de ejemplo para el usuario de prueba (solo si aún no tiene).
-     * No usa Factory/Faker para funcionar en producción (composer --no-dev).
+     * Usa la Factory con Faker (Faker está en require para producción).
      */
     public function run(): void
     {
@@ -38,45 +37,23 @@ class TestUserDataSeeder extends Seeder
             $this->command->warn('No hay tags globales. Ejecuta primero TagSeeder.');
         }
 
-        $conceptsIncome = ['Nómina', 'Freelance', 'Venta', 'Reembolso', 'Inversión', 'Extra'];
-        $conceptsExpense = ['Supermercado', 'Transporte', 'Servicios', 'Ocio', 'Salud', 'Comida'];
+        $transactions = Transaction::factory()
+            ->count(60)
+            ->for($user)
+            ->sequence(
+                ['type' => 'income'],
+                ['type' => 'income'],
+                ['type' => 'expense'],
+                ['type' => 'expense'],
+                ['type' => 'expense'],
+            )
+            ->create();
 
-        $types = [
-            'income', 'income', 'expense', 'expense', 'expense',
-            'income', 'income', 'expense', 'expense', 'expense',
-        ];
-
-        $transactions = [];
-        $now = Carbon::now();
-        for ($i = 0; $i < 60; $i++) {
-            $type = $types[$i % 10];
-            $amount = $type === 'income'
-                ? round(rand(10000, 500000) / 100, 2)
-                : round(rand(1000, 80000) / 100, 2);
-            $concepts = $type === 'income' ? $conceptsIncome : $conceptsExpense;
-            $concept = $concepts[array_rand($concepts)].' '.$now->copy()->subDays(rand(0, 365))->format('Y-m');
-            $date = $now->copy()->subDays(rand(0, 365))->format('Y-m-d');
-
-            $transactions[] = [
-                'user_id' => $user->id,
-                'type' => $type,
-                'amount' => $amount,
-                'concept' => $concept,
-                'date' => $date,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
-
-        foreach (array_chunk($transactions, 20) as $chunk) {
-            Transaction::insert($chunk);
-        }
-
-        $models = Transaction::where('user_id', $user->id)->orderBy('id')->get();
-        foreach ($models as $transaction) {
+        foreach ($transactions as $transaction) {
             if (! empty($tags)) {
-                $attachCount = min(rand(1, 3), count($tags));
-                $tagIds = (array) array_rand(array_flip($tags), $attachCount);
+                $attachCount = rand(1, min(3, count($tags)));
+                $selected = array_rand(array_flip($tags), $attachCount);
+                $tagIds = is_array($selected) ? $selected : [$selected];
                 $transaction->tags()->attach($tagIds);
             }
         }
