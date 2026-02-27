@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "57768454aea9e4db47a7e02c86ab558a",
+    "content-hash": "e4e2d82d8dfc90938b63dba5d60cd720",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -8318,6 +8318,91 @@
                 }
             ],
             "time": "2026-02-17T17:33:08+00:00"
+        },
+        {
+            "name": "pekral/cursor-rules",
+            "version": "0.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pekral/cursor-rules.git",
+                "reference": "08e51eed270c55c94a650341df0cee00fd8f2ed0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pekral/cursor-rules/zipball/08e51eed270c55c94a650341df0cee00fd8f2ed0",
+                "reference": "08e51eed270c55c94a650341df0cee00fd8f2ed0",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.0"
+            },
+            "require-dev": {
+                "composer/composer": "^2.9.5",
+                "ergebnis/composer-normalize": "^2.50.0",
+                "laravel/pint": "^1.27.1",
+                "pekral/phpcs-rules": "^0.4.7",
+                "pekral/phpstan-rules": "^0.4.5",
+                "pekral/rector-rules": "^0.4.8",
+                "pestphp/pest": "^4.4.1",
+                "pestphp/pest-plugin": "^4.0",
+                "pestphp/pest-plugin-type-coverage": "^4.0.3",
+                "phpstan/extension-installer": "^1.4.3",
+                "phpstan/phpstan": "^2.1.39",
+                "phpstan/phpstan-deprecation-rules": "^2.0.4",
+                "phpstan/phpstan-mockery": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0.16",
+                "roave/security-advisories": "dev-latest",
+                "squizlabs/php_codesniffer": "^4.0.1"
+            },
+            "bin": [
+                "bin/cursor-rules"
+            ],
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Pekral\\CursorRules\\ComposerPlugin",
+                "cursor-rules": {
+                    "source": "vendor/pekral/cursor-rules/.cursor/rules",
+                    "target": ".cursor/rules"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Pekral\\CursorRules\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Petr Král",
+                    "homepage": "https://pekral.cz",
+                    "role": "lead"
+                }
+            ],
+            "description": "PHP and Laravel Cursor rules — coding standards, testing, and conventions for Cursor editor",
+            "homepage": "https://github.com/pekral/cursor-rules",
+            "keywords": [
+                "PHPStan",
+                "clean-code",
+                "coding-standards",
+                "cursor",
+                "cursor-editor",
+                "cursor-rules",
+                "laravel",
+                "laravel-cursor-rules",
+                "pest",
+                "php",
+                "php-cursor-rules",
+                "rules"
+            ],
+            "support": {
+                "docs": "https://github.com/pekral/cursor-rules#readme",
+                "issues": "https://github.com/pekral/cursor-rules/issues",
+                "source": "https://github.com/pekral/cursor-rules"
+            },
+            "time": "2026-02-17T17:40:35+00:00"
         },
         {
             "name": "phar-io/manifest",

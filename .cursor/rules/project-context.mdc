@@ -1,0 +1,44 @@
+---
+description: Project-specific context for the personal finance management system
+alwaysApply: true
+---
+
+## Project Overview
+Sistema de gestión de finanzas personales tipo SaaS simple, con Laravel 12 + Filament v3.2.
+
+## Tech Stack
+- PHP 8.2+ con `declare(strict_types=1)` en todos los archivos
+- Laravel 12, Filament v3.2
+- Tailwind CSS v4 (plugin Vite, no tailwind.config.js)
+- Vite 7 con `laravel-vite-plugin`
+- PHPUnit para tests, Laravel Pint para formateo (PSR-12)
+- Deploy: Docker multi-stage + CapRover
+
+## Models & Relationships
+- **User**: `HasMany` Transaction. Campos: name, email, password, is_admin (bool), blocked_at (datetime nullable)
+- **Transaction**: `BelongsTo` User, `BelongsToMany` Tag. Campos: user_id, type ('income'|'expense'), amount (decimal:2), concept, date
+- **Tag**: `BelongsTo` User (nullable), `BelongsToMany` Transaction. Campos: name, color, user_id (nullable = global tag)
+- Pivot: `tag_transaction`
+
+## Authorization Pattern
+- Multi-tenancy simple: `getEloquentQuery()` filtra por `user_id` en Resources
+- Policies: TransactionPolicy (solo el dueño puede CRUD, admin NO accede a transacciones)
+- Tags: scope `forUser($userId)` retorna tags globales (user_id null) + personales del usuario
+- Users con `is_admin = true` gestionan usuarios, NO transacciones
+- Users con `blocked_at != null` están bloqueados
+
+## Filament Resources
+- **TransactionResource**: CRUD de transacciones, filtros por mes/tags/tipo/rango de fecha
+- **TagResource**: Gestión de tags (ManageTags simple page)
+- **UserResource**: Gestión de usuarios (solo admin)
+
+## Widgets
+- **FinanceStatsOverview**: Saldo total, ingresos del mes, gastos del mes
+- **IncomeExpenseChart**: Gráfico de ingresos vs egresos
+
+## Conventions
+- Labels en español (UI), claves de BD en inglés
+- Usar `match` expressions para mapear type → labels/colors/icons
+- Money format: `->money('USD')` en tablas
+- Date format: `d/m/Y` en tablas
+- Default sort: `date desc` en transacciones
