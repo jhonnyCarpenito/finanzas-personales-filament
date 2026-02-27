@@ -6,6 +6,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Transaction;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class IncomeExpenseChart extends ChartWidget
@@ -14,19 +15,22 @@ class IncomeExpenseChart extends ChartWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    public static function canView(): bool
+    {
+        // Los admins no deben ver métricas basadas en transacciones de usuarios.
+        return Auth::check() && ! Auth::user()->is_admin;
+    }
+
     protected function getData(): array
     {
-        $userId = auth()->id();
-        $isAdmin = auth()->user()->is_admin;
+        $userId = Auth::id();
         $currentYear = now()->year;
 
         // Base query
         $query = Transaction::query()
             ->whereYear('date', $currentYear);
 
-        if (! $isAdmin) {
-            $query->where('user_id', $userId);
-        }
+        $query->where('user_id', $userId);
 
         // Expresión de mes según el driver (SQLite vs MySQL/MariaDB)
         $monthExpr = DB::getDriverName() === 'sqlite'

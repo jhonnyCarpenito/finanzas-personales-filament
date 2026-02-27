@@ -12,6 +12,14 @@ class EditTransaction extends EditRecord
 {
     protected static string $resource = TransactionResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // No permitir reasignar ownership.
+        $data['user_id'] = $this->record->user_id;
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
