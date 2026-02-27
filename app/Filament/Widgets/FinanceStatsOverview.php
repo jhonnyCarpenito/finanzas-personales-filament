@@ -7,19 +7,23 @@ namespace App\Filament\Widgets;
 use App\Models\Transaction;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceStatsOverview extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        // Los admins no deben ver métricas basadas en transacciones de usuarios.
+        return Auth::check() && ! Auth::user()->is_admin;
+    }
+
     protected function getStats(): array
     {
-        $userId = auth()->id();
-        $isAdmin = auth()->user()->is_admin;
+        $userId = Auth::id();
 
         // Base query
         $query = Transaction::query();
-        if (! $isAdmin) {
-            $query->where('user_id', $userId);
-        }
+        $query->where('user_id', $userId);
 
         // Saldo Total
         $totalIncome = (clone $query)->where('type', 'income')->sum('amount');

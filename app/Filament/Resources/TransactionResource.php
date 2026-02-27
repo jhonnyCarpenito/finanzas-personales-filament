@@ -15,6 +15,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 
 class TransactionResource extends Resource
@@ -29,13 +30,23 @@ class TransactionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Transacciones';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        // Los administradores NO gestionan transacciones.
+        return Auth::check() && ! Auth::user()->is_admin;
+    }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        if (! auth()->user()->is_admin) {
-            $query->where('user_id', auth()->id());
+        // Las transacciones solo pueden ser vistas/manipuladas por su creador.
+        // Por seguridad, también restringimos el query aquí (además de la Policy).
+        if (! Auth::check() || Auth::user()->is_admin) {
+            return $query->whereRaw('1 = 0');
         }
+
+        $query->where('user_id', Auth::id());
 
         return $query;
     }
@@ -75,7 +86,7 @@ class TransactionResource extends Resource
                             ->relationship(
                                 'tags',
                                 'name',
-                                fn (Builder $query) => $query->forUser(auth()->id())
+                                fn (Builder $query) => $query->forUser((int) Auth::id())
                             )
                             ->multiple()
                             ->preload()
@@ -101,11 +112,11 @@ class TransactionResource extends Resource
                                 return Tag::create([
                                     'name' => $data['name'],
                                     'color' => $data['color'] ?? null,
-                                    'user_id' => auth()->id(), // Tags creadas desde transacciones son personales
+                                    'user_id' => Auth::id(), // Tags creadas desde transacciones son personales
                                 ])->id;
                             }),
                         Forms\Components\Hidden::make('user_id')
-                            ->default(auth()->id()),
+                            ->default(Auth::id()),
                     ]),
             ]);
     }
@@ -174,7 +185,7 @@ class TransactionResource extends Resource
                     ->relationship(
                         'tags',
                         'name',
-                        fn (Builder $query) => $query->forUser((int) auth()->id())
+                        fn (Builder $query) => $query->forUser((int) Auth::id())
                     )
                     ->multiple()
                     ->preload()
