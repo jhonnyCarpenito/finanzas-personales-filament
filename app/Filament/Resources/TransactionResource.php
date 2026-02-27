@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\TagColor;
+use App\Enums\TransactionType;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Models\Tag;
 use App\Models\Transaction;
@@ -75,10 +77,7 @@ class TransactionResource extends Resource
                             ->maxDate(now()),
                         Forms\Components\Select::make('type')
                             ->label('Tipo')
-                            ->options([
-                                'income' => 'Ingreso',
-                                'expense' => 'Egreso',
-                            ])
+                            ->options(TransactionType::options())
                             ->required()
                             ->native(false),
                         Forms\Components\Select::make('tags')
@@ -95,28 +94,23 @@ class TransactionResource extends Resource
                                     ->label('Nombre')
                                     ->required()
                                     ->maxLength(255)
-                                    ->unique(Tag::class, 'name'),
+                                    ->unique(
+                                        table: 'tags',
+                                        column: 'name',
+                                        modifyRuleUsing: fn ($rule) => $rule->where('user_id', Auth::id()),
+                                    ),
                                 Forms\Components\Select::make('color')
                                     ->label('Color')
-                                    ->options([
-                                        'success' => 'Verde',
-                                        'danger' => 'Rojo',
-                                        'warning' => 'Amarillo',
-                                        'info' => 'Azul',
-                                        'gray' => 'Gris',
-                                    ])
+                                    ->options(TagColor::options())
                                     ->native(false),
                             ])
                             ->createOptionUsing(function (array $data) {
-                                // Usuario normal crea tags personales, admin puede crear globales
                                 return Tag::create([
                                     'name' => $data['name'],
                                     'color' => $data['color'] ?? null,
-                                    'user_id' => Auth::id(), // Tags creadas desde transacciones son personales
+                                    'user_id' => Auth::id(),
                                 ])->id;
                             }),
-                        Forms\Components\Hidden::make('user_id')
-                            ->default(Auth::id()),
                     ]),
             ]);
     }
@@ -139,19 +133,7 @@ class TransactionResource extends Resource
                     ->separator(','),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'income' => 'success',
-                        'expense' => 'danger',
-                    })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'income' => 'Ingreso',
-                        'expense' => 'Egreso',
-                    })
-                    ->icon(fn (string $state): string => match ($state) {
-                        'income' => 'heroicon-m-arrow-trending-up',
-                        'expense' => 'heroicon-m-arrow-trending-down',
-                    }),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Monto')
                     ->money('USD')
@@ -192,10 +174,7 @@ class TransactionResource extends Resource
                     ->searchable(),
                 SelectFilter::make('type')
                     ->label('Tipo')
-                    ->options([
-                        'income' => 'Ingreso',
-                        'expense' => 'Egreso',
-                    ]),
+                    ->options(TransactionType::options()),
                 Filter::make('date')
                     ->form([
                         Forms\Components\DatePicker::make('date_from')

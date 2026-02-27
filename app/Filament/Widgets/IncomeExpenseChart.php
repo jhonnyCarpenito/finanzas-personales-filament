@@ -26,45 +26,27 @@ class IncomeExpenseChart extends ChartWidget
         $userId = Auth::id();
         $currentYear = now()->year;
 
-        // Base query
-        $query = Transaction::query()
-            ->whereYear('date', $currentYear);
+        $isSqlite = DB::getDriverName() === 'sqlite';
+        $monthFn = $isSqlite ? "CAST(strftime('%m', date) AS INTEGER)" : 'MONTH(date)';
 
-        $query->where('user_id', $userId);
+        $rows = Transaction::query()
+            ->where('user_id', $userId)
+            ->whereYear('date', $currentYear)
+            ->selectRaw("{$monthFn} as month")
+            ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
+            ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense")
+            ->groupByRaw("{$monthFn}")
+            ->get()
+            ->keyBy('month');
 
-        // Expresión de mes según el driver (SQLite vs MySQL/MariaDB)
-        $monthExpr = DB::getDriverName() === 'sqlite'
-            ? "CAST(strftime('%m', date) AS INTEGER)"
-            : 'MONTH(date)';
-
-        $monthlyIncome = (clone $query)
-            ->where('type', 'income')
-            ->select(
-                DB::raw("{$monthExpr} as month"),
-                DB::raw('SUM(amount) as total')
-            )
-            ->groupBy('month')
-            ->pluck('total', 'month')
-            ->toArray();
-
-        $monthlyExpense = (clone $query)
-            ->where('type', 'expense')
-            ->select(
-                DB::raw("{$monthExpr} as month"),
-                DB::raw('SUM(amount) as total')
-            )
-            ->groupBy('month')
-            ->pluck('total', 'month')
-            ->toArray();
-
-        // Inicializar arrays con 12 meses
         $months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         $incomeData = [];
         $expenseData = [];
 
         for ($i = 1; $i <= 12; $i++) {
-            $incomeData[] = $monthlyIncome[$i] ?? 0;
-            $expenseData[] = $monthlyExpense[$i] ?? 0;
+            $row = $rows->get($i);
+            $incomeData[] = (float) ($row->income ?? 0);
+            $expenseData[] = (float) ($row->expense ?? 0);
         }
 
         return [
