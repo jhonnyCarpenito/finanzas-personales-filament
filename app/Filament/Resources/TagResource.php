@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\TagColor;
 use App\Filament\Resources\TagResource\Pages;
 use App\Models\Tag;
 use Filament\Forms;
@@ -45,16 +46,15 @@ class TagResource extends Resource
                     ->label('Nombre')
                     ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->unique(
+                        table: 'tags',
+                        column: 'name',
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn ($rule) => $rule->where('user_id', auth()->id()),
+                    ),
                 Forms\Components\Select::make('color')
                     ->label('Color')
-                    ->options([
-                        'success' => 'Verde',
-                        'danger' => 'Rojo',
-                        'warning' => 'Amarillo',
-                        'info' => 'Azul',
-                        'gray' => 'Gris',
-                    ])
+                    ->options(TagColor::options())
                     ->native(false),
                 Forms\Components\Toggle::make('is_global')
                     ->label('Tag Global')
@@ -67,27 +67,13 @@ class TagResource extends Resource
                     })
                     ->dehydrated(false),
                 Forms\Components\Hidden::make('user_id')
-                    ->default(function ($record) {
-                        // Si es admin y marca como global, user_id es null
-                        if (auth()->user()->is_admin && request()->boolean('is_global')) {
-                            return null;
-                        }
-                        // Si es admin editando y no cambia el estado, mantener el valor
-                        if ($record && auth()->user()->is_admin) {
-                            return $record->user_id;
-                        }
-
-                        // Usuario normal siempre crea tags personales
-                        return auth()->id();
-                    })
                     ->dehydrateStateUsing(function ($state) {
+                        // Solo admins pueden crear tags globales
                         if (auth()->user()->is_admin && request()->boolean('is_global')) {
                             return null;
                         }
-                        if (auth()->user()->is_admin && ! request()->boolean('is_global')) {
-                            return $state ?? auth()->id();
-                        }
 
+                        // Usuario normal SIEMPRE tiene user_id, ignorar cualquier input
                         return auth()->id();
                     }),
             ]);

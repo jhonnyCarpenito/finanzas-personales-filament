@@ -1,0 +1,98 @@
+---
+description: Laravel architecture and conventions
+alwaysApply: true
+---
+
+## Layer Responsibilities
+- **Controllers**: Slim, delegate to Services, accept FormRequest only, Do not contain business logic.
+- **Services**: All business logic, return DTOs or models, use Single Responsibility, Keep services stateless. Dont read and write operations in one service method.
+- **Repositories**: Read-only, no writes, no business rules
+- **ModelManagers**: Write-only, store data to DB
+- **Data Builders**: Transform/prepare DTOs, never query DB
+- **Jobs**: Slim, delegate to Services
+- **Events**: Slim, delegate to Services
+- **Commands**: Slim, delegate to Services
+
+## Controllers
+- Inject services by method injection
+- Plural names (ContactsController)
+- CRUD methods only (index, create, store, show, edit, update, destroy)
+- Extract new controller for non-CRUD actions
+- Never call `validate()` inside controller
+- Implement proper request validation using Form Requests
+- Aim for "slim" Controllers and put larger logic pieces in Service classes
+- Ensure that every route checks permissions (e.g., auth/can middleware). Every CRUD action validates input.
+
+## Database / Schema
+- Primary keys on every table; prefer INT over BIGINT unless > ~2B rows
+- Smallest fitting data types: INT for integers, DECIMAL for money, VARCHAR(n) for short strings, TIMESTAMP over DATETIME where possible
+- Use InnoDB (row-level locking, foreign keys, transactions)
+- Naming: lower_case_snake_case for tables and columns
+- Normalize first; denormalize only when metrics show a read bottleneck
+- Partition large tables by range (e.g. date) when query patterns benefit
+- Prefer to use Eloquent over using Query Builder and raw SQL queries. Prefer collections over arrays
+- Do not execute queries in Blade templates and use eager loading (N + 1 problem)
+- Define relationships, scopes, casts, and accessors in the model.
+- Use enums with `HasLabel`, `HasColor`, `HasIcon` where applicable.
+- No business logic in models.
+
+## Migrations
+- Only `up()` methods, no `down()`
+- When adding columns in a migration, update the model's `$fillable` array to include those new attributes
+- Never chain multiple migration-creating commands (e.g., `make:model -m`, `make:migration`) with `&&` or `;` — they may get identical timestamps; run each command separately and wait for completion before running the next
+
+## Blade / Views
+- Analyze existing UI style before creating new
+- Keep consistent layout, colors, typography
+- Human-friendly, simply understandable
+- Blade: 4-space indent, no space after control structures
+
+## Testing
+- Laravel: prefer Http::fake() over Mockery
+- Always call jobs in tests using ::dispatch(), e.g., MyJob::dispatch()
+- Always call console commands using Artisan::call(MyCommand::class)
+- Mocking services is only allowed for classes that use external service calls or if it is necessary to simulate an exception throw.
+
+## Helpers
+- Use Laravel helpers instead of `use` section classes. Examples: use `auth()->id()` instead of `Auth::id()` and adding `Auth` in the `use` section. Other examples: use `redirect()->route()` instead of `Redirect::route()`, or `str()->slug()` instead of `Str::slug()`.
+- Replace all foreach with collect() helper.
+
+## Best practices
+- Follow Laravel best practices and conventions
+- Use object-oriented programming with a focus on SOLID principles
+- Prefer iteration and modularization over duplication
+- Favor dependency injection and service containers
+- Use Eloquent ORM instead of raw SQL queries when possible
+- Implement Repository pattern for data access layer
+- Use Laravel's built-in authentication and authorization features
+- Utilize Laravel's caching mechanisms for improved performance
+- Implement job queues for long-running tasks
+- Use Laravel's built-in testing tools (Pest) for unit and feature tests
+- Implement proper database indexing for improved query performance
+- Use Laravel's built-in pagination features
+- Implement proper error logging and monitoring
+- Use Laravel's routing system for defining application endpoints
+
+## Dependencies
+- Composer for dependency management
+
+## Livewire
+- In Livewire projects, don't use Livewire Volt. Only Livewire class components.
+
+## Queue System and Jobs
+- Queue long-running or external-dependent tasks.
+- Implement `ShouldQueue` and `ShouldBeUnique` where applicable.
+- Set `$tries`, `$backoff`, and `$timeout` on every job.
+- Handle failed jobs with `failed()` method.
+- Use job batching for related operations.
+- Jobs are idempotent — safe to retry.
+- No heavy logic in constructors (serialization issues).
+- Queue connections and workers are configured for the workload.
+
+## Middleware
+- Use middleware for cross-cutting concerns (auth, rate limiting, headers, logging).
+- Register middleware in the appropriate group or route.
+- Keep middleware focused — one concern per middleware.
+- Middleware does not contain business logic.
+- Order of middleware is intentional and correct.
+- Terminate middleware is used for post-response tasks.

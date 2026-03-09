@@ -24,6 +24,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'google_email',
         'is_admin',
         'blocked_at',
     ];
@@ -56,6 +58,11 @@ class User extends Authenticatable
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function fundOrigins(): HasMany
+    {
+        return $this->hasMany(FundOrigin::class);
     }
 
     /**

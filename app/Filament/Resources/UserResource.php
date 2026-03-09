@@ -12,6 +12,8 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -27,6 +29,17 @@ class UserResource extends Resource
     protected static ?string $pluralModelLabel = 'Usuarios';
 
     protected static ?int $navigationSort = 10;
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (! Auth::check() || ! Auth::user()->is_admin) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query;
+    }
 
     public static function form(Form $form): Form
     {
@@ -71,6 +84,22 @@ class UserResource extends Resource
                     ->label('Correo')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('google_id')
+                    ->label('Google')
+                    ->boolean()
+                    ->getStateUsing(fn (User $record): bool => $record->google_id !== null)
+                    ->trueIcon('heroicon-m-check-circle')
+                    ->falseIcon('heroicon-m-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('google_email')
+                    ->label('Correo Gmail')
+                    ->formatStateUsing(fn (User $record): ?string => $record->google_email ?? ($record->google_id ? $record->email : null))
+                    ->placeholder('—')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\IconColumn::make('is_admin')
                     ->label('Admin')
                     ->boolean()
