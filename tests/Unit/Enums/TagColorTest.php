@@ -16,6 +16,15 @@ class TagColorTest extends TestCase
         $this->assertSame('Amarillo', TagColor::Warning->getLabel());
         $this->assertSame('Azul', TagColor::Info->getLabel());
         $this->assertSame('Gris', TagColor::Gray->getLabel());
+        $this->assertSame('Ámbar', TagColor::Primary->getLabel());
+        $this->assertSame('Púrpura', TagColor::Purple->getLabel());
+        $this->assertSame('Violeta', TagColor::Violet->getLabel());
+        $this->assertSame('Verde azulado', TagColor::Teal->getLabel());
+        $this->assertSame('Cian', TagColor::Cyan->getLabel());
+        $this->assertSame('Naranja', TagColor::Orange->getLabel());
+        $this->assertSame('Rosa', TagColor::Rose->getLabel());
+        $this->assertSame('Fucsia', TagColor::Fuchsia->getLabel());
+        $this->assertSame('Rosa fuerte', TagColor::Pink->getLabel());
     }
 
     public function test_color_matches_value(): void
@@ -35,6 +44,15 @@ class TagColorTest extends TestCase
             'warning' => 'Amarillo',
             'info' => 'Azul',
             'gray' => 'Gris',
+            'primary' => 'Ámbar',
+            'purple' => 'Púrpura',
+            'violet' => 'Violeta',
+            'teal' => 'Verde azulado',
+            'cyan' => 'Cian',
+            'orange' => 'Naranja',
+            'rose' => 'Rosa',
+            'fuchsia' => 'Fucsia',
+            'pink' => 'Rosa fuerte',
         ], $options);
     }
 }

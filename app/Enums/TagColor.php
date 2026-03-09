@@ -14,6 +14,15 @@ enum TagColor: string implements HasLabel, HasColor
     case Warning = 'warning';
     case Info = 'info';
     case Gray = 'gray';
+    case Primary = 'primary';
+    case Purple = 'purple';
+    case Violet = 'violet';
+    case Teal = 'teal';
+    case Cyan = 'cyan';
+    case Orange = 'orange';
+    case Rose = 'rose';
+    case Fuchsia = 'fuchsia';
+    case Pink = 'pink';
 
     public function getLabel(): string
     {
@@ -23,6 +32,15 @@ enum TagColor: string implements HasLabel, HasColor
             self::Warning => 'Amarillo',
             self::Info => 'Azul',
             self::Gray => 'Gris',
+            self::Primary => 'Ámbar',
+            self::Purple => 'Púrpura',
+            self::Violet => 'Violeta',
+            self::Teal => 'Verde azulado',
+            self::Cyan => 'Cian',
+            self::Orange => 'Naranja',
+            self::Rose => 'Rosa',
+            self::Fuchsia => 'Fucsia',
+            self::Pink => 'Rosa fuerte',
         };
     }
 

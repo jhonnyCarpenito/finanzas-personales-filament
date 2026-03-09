@@ -72,6 +72,15 @@ class CapitalPieChartWidget extends ChartWidget
             'warning' => 'rgba(234, 179, 8, 0.8)',
             'info' => 'rgba(59, 130, 246, 0.8)',
             'gray' => 'rgba(107, 114, 128, 0.8)',
+            'primary' => 'rgba(245, 158, 11, 0.8)',
+            'purple' => 'rgba(168, 85, 247, 0.8)',
+            'violet' => 'rgba(139, 92, 246, 0.8)',
+            'teal' => 'rgba(20, 184, 166, 0.8)',
+            'cyan' => 'rgba(6, 182, 212, 0.8)',
+            'orange' => 'rgba(249, 115, 22, 0.8)',
+            'rose' => 'rgba(244, 63, 94, 0.8)',
+            'fuchsia' => 'rgba(217, 70, 239, 0.8)',
+            'pink' => 'rgba(236, 72, 153, 0.8)',
         ];
 
         return $map[$color] ?? 'rgba(107, 114, 128, 0.8)';
