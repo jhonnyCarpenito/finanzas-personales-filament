@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->hasMany(Transaction::class);
     }
 
+    public function fundOrigins(): HasMany
+    {
+        return $this->hasMany(FundOrigin::class);
+    }
+
     /**
      * Verificar si el usuario está bloqueado
      */

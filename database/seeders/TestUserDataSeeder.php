@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\FundOrigin;
 use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\User;
@@ -23,6 +24,10 @@ class TestUserDataSeeder extends Seeder
             $this->command->warn('Usuario de prueba no encontrado. Ejecuta primero TestUserSeeder.');
 
             return;
+        }
+
+        if ($user->fundOrigins()->count() === 0) {
+            $this->seedFundOrigins($user);
         }
 
         if ($user->transactions()->count() > 0) {
@@ -59,5 +64,27 @@ class TestUserDataSeeder extends Seeder
         }
 
         $this->command->info('Transacciones de ejemplo creadas para usuario de prueba ('.TestUserSeeder::TEST_USER_EMAIL.').');
+    }
+
+    private function seedFundOrigins(User $user): void
+    {
+        $origins = [
+            ['name' => 'Banesco Panamá', 'amount' => 5000.00, 'color' => 'success', 'order' => 1],
+            ['name' => 'MetaMask', 'amount' => 1200.50, 'color' => 'info', 'order' => 2],
+            ['name' => 'Efectivo', 'amount' => 350.00, 'color' => 'warning', 'order' => 3],
+            ['name' => 'Binance', 'amount' => 800.00, 'color' => 'gray', 'order' => 4],
+        ];
+
+        foreach ($origins as $data) {
+            FundOrigin::create([
+                'user_id' => $user->id,
+                'name' => $data['name'],
+                'amount' => $data['amount'],
+                'color' => $data['color'],
+                'order' => $data['order'],
+            ]);
+        }
+
+        $this->command->info('Orígenes de fondos de ejemplo creados para usuario de prueba.');
     }
 }

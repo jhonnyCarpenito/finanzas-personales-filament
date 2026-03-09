@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\FundOrigin;
 use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Policies\FundOriginPolicy;
 use App\Policies\TagPolicy;
 use App\Policies\TransactionPolicy;
 use App\Policies\UserPolicy;
@@ -20,6 +22,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        FundOrigin::class => FundOriginPolicy::class,
         Tag::class => TagPolicy::class,
         Transaction::class => TransactionPolicy::class,
         User::class => UserPolicy::class,
