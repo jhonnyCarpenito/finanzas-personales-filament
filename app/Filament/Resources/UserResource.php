@@ -84,6 +84,22 @@ class UserResource extends Resource
                     ->label('Correo')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('google_id')
+                    ->label('Google')
+                    ->boolean()
+                    ->getStateUsing(fn (User $record): bool => $record->google_id !== null)
+                    ->trueIcon('heroicon-m-check-circle')
+                    ->falseIcon('heroicon-m-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('google_email')
+                    ->label('Correo Gmail')
+                    ->formatStateUsing(fn (User $record): ?string => $record->google_email ?? ($record->google_id ? $record->email : null))
+                    ->placeholder('—')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\IconColumn::make('is_admin')
                     ->label('Admin')
                     ->boolean()

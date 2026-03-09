@@ -1,5 +1,5 @@
 ---
-description: Filament v3.2 rules for Resources, Forms, Tables, Widgets and Actions
+description: Filament v4 specific rules
 globs:
   - app/Filament/**/*.php
 ---
@@ -7,41 +7,27 @@ globs:
 ## Resources
 - Generate smoke tests for every Resource; when changing a Resource, run tests (add them if missing) and fix resource/tests until they pass
 - No View page or Infolist unless requested
-- Use `Resource::getUrl('index')` with the exact Resource class (e.g. `TransactionResource::getUrl('index')`), not `route()` or `getResource()`
-- Override `getEloquentQuery()` for global scoping (e.g. multi-tenancy)
-- Use `->relationship()` on Select for BelongsToMany with `->multiple()` and `->preload()`
-
-## Forms (v3)
-- Use `Forms\Components\Section::make()` to group related fields
-- Use `->form()` on Actions/Filters (this is v3 syntax)
-- Use `->mutateFormDataUsing()` for data manipulation before save
-- Use `->createOptionForm()` on Select to allow inline creation of related models
-- Use `->createOptionUsing()` for custom creation logic
-- `Placeholder::make()` is valid in v3
-
-## Tables (v3)
-- Use `->badge()` on TextColumn for status/type indicators
-- Use `->color(fn)`, `->icon(fn)`, `->formatStateUsing(fn)` with closures and `match` expressions
-- Use `->money('USD')` for currency columns
-- Use `SelectFilter` for enum/option filtering, `Filter` with custom `->form()` for date ranges
+- Use `Resource::getUrl('index')` with the exact Resource class (e.g. `ClassScheduleResource::getUrl('index')`), not `route()` or `getResource()`
 
 ## Enums
-- Consider using PHP Enums with `HasLabel`, `HasColor`, `HasIcon` interfaces for model fields
-- Use exact return types from interface definitions
+- Add `HasLabel`, `HasColor`, `HasIcon` interfaces on Enums for model fields; use them in Forms/Tables instead of inline values/labels/colors/icons
+- Use exact return types from interface definitions (e.g. `string|BackedEnum|Htmlable|null` for `getIcon()`, not `string|Heroicon|null`)
 - Never add `->value` when defining a default with enum
-
-## Widgets (v3)
-- Use `StatsOverviewWidget` with `Stat::make()` for dashboard metrics
-- Use `ChartWidget` for line/bar charts
-- Override `canView()` to control widget visibility per user role
+- Use Enum instances instead of hardcoded strings where an Enum exists (e.g. in tests for casted fields)
 
 ## Testing
-- Use `Livewire::test(class)` syntax, not `livewire(class)`
+- Use `Livewire::test(class)` syntax, not `livewire(class)` (avoids pestphp/pest-plugin-livewire)
 
 ## Actions
-- Use `->authorize('ability')` on actions for authorization
-- For `unique()` validation, specify `->unique(ignoreRecord: true)` on edit forms (required in v3)
+- Use `->authorize('ability')` on actions for authorization (handles enforcement and visibility); do not use `Gate::authorize()` or `Gate::allows()` manually
+- v4: `unique()` has `ignoreRecord: true` by default; do not specify it
 
-## Icons
-- Use Heroicon strings (e.g. `'heroicon-o-currency-dollar'`, `'heroicon-m-arrow-trending-up'`)
-- Prefix `heroicon-o-` for outline, `heroicon-s-` for solid, `heroicon-m-` for mini
+## UI
+- Icons: use `Filament\Support\Icons\Heroicon` enum, not string
+- Custom Blade files with Tailwind: create a custom theme and register the Blade folder in theme.css
+
+## Deprecated (v3 → v4, do not use)
+- `->form()` on Actions/Filters → use `->schema()`
+- `->mutateFormDataUsing()` → use `->mutateDataUsing()`
+- `Placeholder::make()` → use `TextEntry::make()->state()` (Filament\Infolists\Components\TextEntry)
+- `->label('')` for hidden labels → use `->hiddenLabel()`
