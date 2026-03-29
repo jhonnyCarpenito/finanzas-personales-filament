@@ -17,8 +17,8 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionResource extends Resource
 {
@@ -63,23 +63,26 @@ class TransactionResource extends Resource
                             ->label('Concepto')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('amount')
-                            ->label('Monto')
-                            ->numeric()
-                            ->required()
-                            ->minValue(0.01)
-                            ->prefix('$')
-                            ->step(0.01),
-                        Forms\Components\DatePicker::make('date')
-                            ->label('Fecha')
-                            ->required()
-                            ->default(now())
-                            ->maxDate(now()),
-                        Forms\Components\Select::make('type')
-                            ->label('Tipo')
-                            ->options(TransactionType::options())
-                            ->required()
-                            ->native(false),
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\TextInput::make('amount')
+                                    ->label('Monto')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(0.01)
+                                    ->prefix('$')
+                                    ->step(0.01),
+                                Forms\Components\DatePicker::make('date')
+                                    ->label('Fecha')
+                                    ->required()
+                                    ->default(now())
+                                    ->maxDate(now()),
+                                Forms\Components\Select::make('type')
+                                    ->label('Tipo')
+                                    ->options(TransactionType::options())
+                                    ->required()
+                                    ->native(false),
+                            ]),
                         Forms\Components\Select::make('tags')
                             ->label('Etiquetas')
                             ->relationship(
