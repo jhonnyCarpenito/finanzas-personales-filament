@@ -29,4 +29,22 @@ final class CapitalTotalWidgetTest extends TestCase
 
         $this->assertFalse((bool) session()->get(CapitalAmountDisplay::SESSION_KEY));
     }
+
+    public function test_total_updates_after_fund_origins_data_changed_event(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        FundOrigin::factory()->create(['user_id' => $user->id, 'amount' => 100]);
+
+        $this->actingAs($user);
+
+        $component = Livewire::test(CapitalTotalWidget::class);
+
+        $component->assertSee('$100.00');
+
+        FundOrigin::factory()->create(['user_id' => $user->id, 'amount' => 50]);
+
+        $component->dispatch(CapitalTotalWidget::FUND_ORIGINS_DATA_CHANGED_EVENT);
+
+        $component->assertSee('$150.00');
+    }
 }

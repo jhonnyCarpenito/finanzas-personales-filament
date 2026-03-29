@@ -9,10 +9,13 @@ use App\Support\CapitalAmountDisplay;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\On;
 
 class CapitalTotalWidget extends Widget
 {
     public const AMOUNT_VISIBILITY_CHANGED_EVENT = 'capital-total-visibility-changed';
+
+    public const FUND_ORIGINS_DATA_CHANGED_EVENT = 'fund-origins-data-changed';
 
     protected static ?int $sort = 11;
 
@@ -26,6 +29,9 @@ class CapitalTotalWidget extends Widget
             Session::put(CapitalAmountDisplay::SESSION_KEY, true);
         }
     }
+
+    #[On(self::FUND_ORIGINS_DATA_CHANGED_EVENT)]
+    public function refreshAfterFundOriginsDataChanged(): void {}
 
     public static function canView(): bool
     {

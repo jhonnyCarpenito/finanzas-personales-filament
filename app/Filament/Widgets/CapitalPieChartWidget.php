@@ -7,6 +7,7 @@ namespace App\Filament\Widgets;
 use App\Models\FundOrigin;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 
 class CapitalPieChartWidget extends ChartWidget
 {
@@ -20,6 +21,9 @@ class CapitalPieChartWidget extends ChartWidget
     {
         return Auth::check() && ! Auth::user()->is_admin;
     }
+
+    #[On(CapitalTotalWidget::FUND_ORIGINS_DATA_CHANGED_EVENT)]
+    public function refreshAfterFundOriginsDataChanged(): void {}
 
     protected function getData(): array
     {
