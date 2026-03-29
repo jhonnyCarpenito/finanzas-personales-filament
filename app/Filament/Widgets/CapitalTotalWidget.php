@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Models\FundOrigin;
+use App\Support\CapitalAmountDisplay;
 use Filament\Widgets\Widget;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class CapitalTotalWidget extends Widget
 {
+    public const AMOUNT_VISIBILITY_CHANGED_EVENT = 'capital-total-visibility-changed';
+
     protected static ?int $sort = 11;
 
     protected int|string|array $columnSpan = 1;
@@ -20,8 +22,8 @@ class CapitalTotalWidget extends Widget
 
     public function mount(): void
     {
-        if (! Session::has('capital_total_amount_visible')) {
-            Session::put('capital_total_amount_visible', true);
+        if (! Session::has(CapitalAmountDisplay::SESSION_KEY)) {
+            Session::put(CapitalAmountDisplay::SESSION_KEY, true);
         }
     }
 
@@ -32,8 +34,10 @@ class CapitalTotalWidget extends Widget
 
     public function toggleAmountVisibility(): void
     {
-        $visible = Session::get('capital_total_amount_visible', true);
-        Session::put('capital_total_amount_visible', ! $visible);
+        $visible = Session::get(CapitalAmountDisplay::SESSION_KEY, true);
+        Session::put(CapitalAmountDisplay::SESSION_KEY, ! $visible);
+
+        $this->dispatch(self::AMOUNT_VISIBILITY_CHANGED_EVENT);
     }
 
     public function getTotal(): float
@@ -45,18 +49,11 @@ class CapitalTotalWidget extends Widget
 
     public function isAmountVisible(): bool
     {
-        return Session::get('capital_total_amount_visible', true);
+        return (bool) Session::get(CapitalAmountDisplay::SESSION_KEY, true);
     }
 
     public function getDisplayValue(): string
     {
-        $total = $this->getTotal();
-
-        if ($this->isAmountVisible()) {
-            return '$' . number_format($total, 2);
-        }
-
-        $visibleLength = strlen('$' . number_format($total, 2));
-        return str_repeat('*', max(8, $visibleLength));
+        return CapitalAmountDisplay::format($this->getTotal(), $this->isAmountVisible());
     }
 }

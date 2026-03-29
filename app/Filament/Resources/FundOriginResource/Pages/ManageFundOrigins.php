@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\FundOriginResource\Pages;
 
 use App\Filament\Resources\FundOriginResource;
+use App\Filament\Widgets\CapitalTotalWidget;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
+use Livewire\Attributes\On;
 
 class ManageFundOrigins extends ManageRecords
 {
@@ -20,4 +22,7 @@ class ManageFundOrigins extends ManageRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    #[On(CapitalTotalWidget::AMOUNT_VISIBILITY_CHANGED_EVENT)]
+    public function refreshTableAfterCapitalVisibilityToggle(): void {}
 }

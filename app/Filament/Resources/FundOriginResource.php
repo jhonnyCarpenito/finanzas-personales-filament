@@ -6,9 +6,8 @@ namespace App\Filament\Resources;
 
 use App\Enums\TagColor;
 use App\Filament\Resources\FundOriginResource\Pages;
-use App\Filament\Widgets\CapitalPieChartWidget;
-use App\Filament\Widgets\CapitalTotalWidget;
 use App\Models\FundOrigin;
+use App\Support\CapitalAmountDisplay;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -82,7 +81,7 @@ class FundOriginResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Monto')
-                    ->money('USD')
+                    ->formatStateUsing(fn ($state): string => CapitalAmountDisplay::formatUsingSession((float) $state))
                     ->sortable()
                     ->alignEnd(),
                 Tables\Columns\TextColumn::make('color')
