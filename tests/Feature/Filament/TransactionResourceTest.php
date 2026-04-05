@@ -8,6 +8,7 @@ use App\Filament\Resources\TransactionResource;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class TransactionResourceTest extends TestCase
@@ -52,5 +53,34 @@ class TransactionResourceTest extends TestCase
         $this->actingAs($user);
         $this->assertTrue(TransactionResource::shouldRegisterNavigation());
     }
-}
 
+    public function test_month_filter_includes_last_day_when_date_column_has_time_suffix(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $this->actingAs($user);
+
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'type' => 'income',
+            'date' => '2026-01-31',
+            'concept' => 'End of month check',
+            'amount' => 100.00,
+        ]);
+
+        DB::table('transactions')->where('id', $transaction->id)->update([
+            'date' => '2026-01-31 00:00:00',
+        ]);
+
+        $betweenCount = TransactionResource::getEloquentQuery()
+            ->whereBetween('date', ['2026-01-01', '2026-01-31'])
+            ->count();
+
+        $whereDateCount = TransactionResource::getEloquentQuery()
+            ->whereDate('date', '>=', '2026-01-01')
+            ->whereDate('date', '<=', '2026-01-31')
+            ->count();
+
+        $this->assertSame(0, $betweenCount);
+        $this->assertSame(1, $whereDateCount);
+    }
+}

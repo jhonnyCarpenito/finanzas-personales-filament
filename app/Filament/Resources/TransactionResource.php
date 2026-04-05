@@ -163,7 +163,11 @@ class TransactionResource extends Resource
                         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
                         $end = (clone $start)->endOfMonth();
 
-                        return $query->whereBetween('date', [$start->toDateString(), $end->toDateString()]);
+                        // Use whereDate (not whereBetween on raw Y-m-d strings): SQLite stores dates as
+                        // "YYYY-MM-DD HH:MM:SS", and lexical BETWEEN excludes the last day of the month.
+                        return $query
+                            ->whereDate('date', '>=', $start->toDateString())
+                            ->whereDate('date', '<=', $end->toDateString());
                     }),
                 SelectFilter::make('tags')
                     ->label('Etiquetas')
