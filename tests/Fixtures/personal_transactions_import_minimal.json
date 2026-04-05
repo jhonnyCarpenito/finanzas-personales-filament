@@ -1,0 +1,6 @@
+{
+  "transactions": [
+    { "date": "2026-02-01", "amount": 10.50, "concept": "Fixture ingreso único", "type": "income", "tags": ["Freelance"] },
+    { "date": "2026-02-02", "amount": 5.00, "concept": "Fixture gasto tag nuevo", "type": "expense", "tags": ["UniqueImportTagXYZ"] }
+  ]
+}

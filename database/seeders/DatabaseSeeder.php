@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             TagSeeder::class,
             AdminUserSeeder::class,
             TestUserSeeder::class,
+            PersonalTransactionsJsonSeeder::class,
             TestUserDataSeeder::class,
         ]);
     }
