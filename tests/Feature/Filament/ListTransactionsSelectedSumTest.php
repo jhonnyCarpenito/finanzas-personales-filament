@@ -19,19 +19,23 @@ final class ListTransactionsSelectedSumTest extends TestCase
     {
         $user = User::factory()->create(['is_admin' => false]);
         $other = User::factory()->create(['is_admin' => false]);
-        $ownedA = Transaction::factory()->create(['user_id' => $user->id, 'amount' => 17]);
-        $ownedB = Transaction::factory()->create(['user_id' => $user->id, 'amount' => 103]);
+        $ownedIncome = Transaction::factory()->income()->create(['user_id' => $user->id, 'amount' => 17]);
+        $ownedExpense = Transaction::factory()->expense()->create(['user_id' => $user->id, 'amount' => 103]);
         $foreign = Transaction::factory()->create(['user_id' => $other->id, 'amount' => 999]);
 
         $this->actingAs($user);
 
         Livewire::test(ListTransactions::class)
             ->call('sumSelectedTransactions', [
-                (string) $ownedA->id,
-                (string) $ownedB->id,
+                (string) $ownedIncome->id,
+                (string) $ownedExpense->id,
                 (string) $foreign->id,
             ])
-            ->assertReturned('120.00');
+            ->assertReturned([
+                'total' => '120.00',
+                'income' => '17.00',
+                'expense' => '103.00',
+            ]);
     }
 
     public function test_sum_selected_transactions_returns_zero_for_empty_ids(): void
@@ -41,6 +45,10 @@ final class ListTransactionsSelectedSumTest extends TestCase
 
         Livewire::test(ListTransactions::class)
             ->call('sumSelectedTransactions', [])
-            ->assertReturned('0.00');
+            ->assertReturned([
+                'total' => '0.00',
+                'income' => '0.00',
+                'expense' => '0.00',
+            ]);
     }
 }
