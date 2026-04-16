@@ -202,6 +202,18 @@ class TransactionResource extends Resource
                     }),
             ])
             ->actions([
+                Tables\Actions\Action::make('duplicate')
+                    ->label('Duplicar')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('gray')
+                    ->authorize('create')
+                    ->requiresConfirmation()
+                    ->action(function (Transaction $record): void {
+                        $duplicateTransaction = $record->replicate();
+                        $duplicateTransaction->user_id = (int) Auth::id();
+                        $duplicateTransaction->save();
+                        $duplicateTransaction->tags()->sync($record->tags()->pluck('tags.id')->all());
+                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])

@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\TransactionResource;
+use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
+use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class TransactionResourceTest extends TestCase
@@ -82,5 +85,48 @@ class TransactionResourceTest extends TestCase
 
         $this->assertSame(0, $betweenCount);
         $this->assertSame(1, $whereDateCount);
+    }
+
+    public function test_duplicate_table_action_creates_a_new_transaction_with_same_data_and_tags(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $this->actingAs($user);
+
+        $tagA = Tag::query()->create([
+            'name' => 'Hogar',
+            'color' => 'blue',
+            'user_id' => $user->id,
+        ]);
+        $tagB = Tag::query()->create([
+            'name' => 'Global',
+            'color' => 'green',
+            'user_id' => null,
+        ]);
+
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'type' => 'expense',
+            'amount' => 98.50,
+            'concept' => 'Servicio de internet',
+            'date' => '2026-04-12',
+        ]);
+        $transaction->tags()->sync([$tagA->id, $tagB->id]);
+
+        Livewire::test(ListTransactions::class)
+            ->callTableAction('duplicate', $transaction);
+
+        $this->assertDatabaseCount('transactions', 2);
+
+        $duplicate = Transaction::query()
+            ->where('user_id', $user->id)
+            ->where('concept', 'Servicio de internet')
+            ->whereKeyNot($transaction->id)
+            ->first();
+
+        $this->assertNotNull($duplicate);
+        $this->assertSame('expense', $duplicate->type->value);
+        $this->assertSame('98.50', $duplicate->amount);
+        $this->assertSame('2026-04-12', $duplicate->date->toDateString());
+        $this->assertEqualsCanonicalizing([$tagA->id, $tagB->id], $duplicate->tags()->pluck('tags.id')->all());
     }
 }
