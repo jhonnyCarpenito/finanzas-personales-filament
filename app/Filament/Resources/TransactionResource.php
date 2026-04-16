@@ -11,6 +11,7 @@ use App\Models\Tag;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
@@ -213,6 +214,12 @@ class TransactionResource extends Resource
                         $duplicateTransaction->user_id = (int) Auth::id();
                         $duplicateTransaction->save();
                         $duplicateTransaction->tags()->sync($record->tags()->pluck('tags.id')->all());
+
+                        Notification::make()
+                            ->success()
+                            ->title('Transacción duplicada')
+                            ->body('La transacción se duplicó correctamente.')
+                            ->send();
                     }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
