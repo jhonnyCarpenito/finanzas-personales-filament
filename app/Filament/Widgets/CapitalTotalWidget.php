@@ -31,11 +31,14 @@ class CapitalTotalWidget extends Widget
     }
 
     #[On(self::FUND_ORIGINS_DATA_CHANGED_EVENT)]
-    public function refreshAfterFundOriginsDataChanged(): void {}
+    public function refreshAfterFundOriginsDataChanged(): void
+    {
+        // Livewire listener intentionally empty to trigger widget refresh.
+    }
 
     public static function canView(): bool
     {
-        return Auth::check() && ! Auth::user()->is_admin;
+        return false;
     }
 
     public function toggleAmountVisibility(): void

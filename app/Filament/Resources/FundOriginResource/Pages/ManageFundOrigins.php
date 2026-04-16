@@ -6,7 +6,9 @@ namespace App\Filament\Resources\FundOriginResource\Pages;
 
 use App\Filament\Resources\FundOriginResource;
 use App\Filament\Widgets\CapitalPieChartWidget;
+use App\Filament\Widgets\CapitalTrendChartWidget;
 use App\Filament\Widgets\CapitalTotalWidget;
+use App\Services\CapitalSnapshotService;
 use Filament\Actions;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
@@ -14,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 
 class ManageFundOrigins extends ManageRecords
@@ -30,13 +33,16 @@ class ManageFundOrigins extends ManageRecords
     }
 
     #[On(CapitalTotalWidget::AMOUNT_VISIBILITY_CHANGED_EVENT)]
-    public function refreshTableAfterCapitalVisibilityToggle(): void {}
+    public function refreshTableAfterCapitalVisibilityToggle(): void
+    {
+        // Livewire event listener to trigger a component refresh cycle.
+    }
 
     public function reorderTable(array $order): void
     {
         parent::reorderTable($order);
 
-        $this->notifyFundOriginWidgetsDataChanged();
+        $this->captureSnapshotAndNotifyFundOriginWidgetsDataChanged();
     }
 
     protected function configureCreateAction(CreateAction|Tables\Actions\CreateAction $action): void
@@ -44,7 +50,7 @@ class ManageFundOrigins extends ManageRecords
         parent::configureCreateAction($action);
 
         $action->after(function (): void {
-            $this->notifyFundOriginWidgetsDataChanged();
+            $this->captureSnapshotAndNotifyFundOriginWidgetsDataChanged();
         });
     }
 
@@ -53,7 +59,7 @@ class ManageFundOrigins extends ManageRecords
         parent::configureEditAction($action);
 
         $action->after(function (): void {
-            $this->notifyFundOriginWidgetsDataChanged();
+            $this->captureSnapshotAndNotifyFundOriginWidgetsDataChanged();
         });
     }
 
@@ -62,7 +68,7 @@ class ManageFundOrigins extends ManageRecords
         parent::configureDeleteAction($action);
 
         $action->after(function (): void {
-            $this->notifyFundOriginWidgetsDataChanged();
+            $this->captureSnapshotAndNotifyFundOriginWidgetsDataChanged();
         });
     }
 
@@ -71,8 +77,15 @@ class ManageFundOrigins extends ManageRecords
         parent::configureDeleteBulkAction($action);
 
         $action->after(function (): void {
-            $this->notifyFundOriginWidgetsDataChanged();
+            $this->captureSnapshotAndNotifyFundOriginWidgetsDataChanged();
         });
+    }
+
+    private function captureSnapshotAndNotifyFundOriginWidgetsDataChanged(): void
+    {
+        app(CapitalSnapshotService::class)->captureForUser((int) Auth::id());
+
+        $this->notifyFundOriginWidgetsDataChanged();
     }
 
     private function notifyFundOriginWidgetsDataChanged(): void
@@ -81,5 +94,6 @@ class ManageFundOrigins extends ManageRecords
 
         $this->dispatch($event)->to(CapitalTotalWidget::class);
         $this->dispatch($event)->to(CapitalPieChartWidget::class);
+        $this->dispatch($event)->to(CapitalTrendChartWidget::class);
     }
 }

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Seeders;
 
+use App\Models\CapitalSnapshot;
 use App\Models\Transaction;
 use App\Models\User;
+use Database\Seeders\TestUserCapitalSnapshotsSeeder;
 use Database\Seeders\TestUserDataSeeder;
 use Database\Seeders\TestUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,6 +46,24 @@ class TestUserSeedersTest extends TestCase
             $firstCount,
             $secondCount,
             'Running TestUserDataSeeder twice should not duplicate transactions'
+        );
+    }
+
+    public function test_test_user_capital_snapshots_are_seeded_only_once(): void
+    {
+        (new TestUserSeeder())->run();
+        $user = User::where('email', TestUserSeeder::TEST_USER_EMAIL)->firstOrFail();
+
+        $this->seed(TestUserCapitalSnapshotsSeeder::class);
+        $firstCount = CapitalSnapshot::query()->where('user_id', $user->id)->count();
+        $this->assertSame(47, $firstCount);
+
+        $this->seed(TestUserCapitalSnapshotsSeeder::class);
+        $secondCount = CapitalSnapshot::query()->where('user_id', $user->id)->count();
+        $this->assertSame(
+            $firstCount,
+            $secondCount,
+            'Running TestUserCapitalSnapshotsSeeder twice should not duplicate snapshots'
         );
     }
 }

@@ -16,6 +16,7 @@
             <div class="flex flex-col gap-6 min-w-0">
                 @livewire(\App\Filament\Widgets\CapitalTotalWidget::class, $this->getWidgetData(), key('capital-total'))
                 @livewire(\App\Filament\Widgets\CapitalPieChartWidget::class, $this->getWidgetData(), key('capital-pie-chart'))
+                @livewire(\App\Filament\Widgets\CapitalTrendChartWidget::class, $this->getWidgetData(), key('capital-trend-chart'))
             </div>
         </div>
 

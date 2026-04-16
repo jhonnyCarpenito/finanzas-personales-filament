@@ -23,5 +23,11 @@ class DatabaseSeeder extends Seeder
             PersonalTransactionsJsonSeeder::class,
             TestUserDataSeeder::class,
         ]);
+
+        if (app()->environment(['local', 'testing'])) {
+            $this->call([
+                TestUserCapitalSnapshotsSeeder::class,
+            ]);
+        }
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Models\FundOrigin;
 use App\Models\Transaction;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -12,6 +13,11 @@ use Illuminate\Support\Facades\DB;
 
 class FinanceStatsOverview extends BaseWidget
 {
+    protected function getColumns(): int
+    {
+        return 4;
+    }
+
     public static function canView(): bool
     {
         return Auth::check() && ! Auth::user()->is_admin;
@@ -38,6 +44,9 @@ class FinanceStatsOverview extends BaseWidget
         $balance = (float) ($result->total_income ?? 0) - (float) ($result->total_expense ?? 0);
         $monthlyIncome = (float) ($result->monthly_income ?? 0);
         $monthlyExpense = (float) ($result->monthly_expense ?? 0);
+        $capitalTotal = (float) FundOrigin::query()
+            ->where('user_id', $userId)
+            ->sum('amount');
 
         return [
             Stat::make('Saldo Total', '$' . number_format($balance, 2))
@@ -52,6 +61,10 @@ class FinanceStatsOverview extends BaseWidget
                 ->description(now()->format('F Y'))
                 ->color('danger')
                 ->icon('heroicon-o-arrow-trending-down'),
+            Stat::make('Capital Total', '$' . number_format($capitalTotal, 2))
+                ->description('Suma de orígenes de fondos')
+                ->color($capitalTotal >= 0 ? 'success' : 'danger')
+                ->icon('heroicon-o-banknotes'),
         ];
     }
 }
