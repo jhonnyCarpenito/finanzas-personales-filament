@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Actions\Action as TableAction;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\View\TablesRenderHook;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
@@ -29,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureFilamentIconButtonActionsWithTooltips();
+
         FilamentColor::register([
             'purple' => Color::Purple,
             'violet' => Color::Violet,
@@ -60,5 +67,26 @@ class AppServiceProvider extends ServiceProvider
                 ])->render());
             },
         );
+    }
+
+    private function configureFilamentIconButtonActionsWithTooltips(): void
+    {
+        $configure = function (TableAction|BulkAction|CreateAction|DeleteAction $action): void {
+            $action->iconButton();
+            $action->tooltip(function (TableAction|BulkAction|CreateAction|DeleteAction $action): ?string {
+                $label = $action->getLabel();
+
+                if ($label instanceof Htmlable) {
+                    return strip_tags($label->toHtml());
+                }
+
+                return is_string($label) ? $label : null;
+            });
+        };
+
+        TableAction::configureUsing($configure);
+        BulkAction::configureUsing($configure);
+        CreateAction::configureUsing($configure);
+        DeleteAction::configureUsing($configure);
     }
 }
