@@ -8,6 +8,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\CreateAction as TableCreateAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Tests\TestCase;
@@ -39,21 +40,30 @@ final class FilamentActionConfigurationTest extends TestCase
         $this->assertSame(__('filament-actions::delete.multiple.label'), $action->getTooltip());
     }
 
-    public function test_page_create_action_uses_icon_button_with_label_tooltip(): void
+    public function test_page_create_action_keeps_default_button_with_visible_label(): void
     {
         $action = CreateAction::make();
 
-        $this->assertTrue($action->isIconButton());
-        $this->assertIsString($action->getLabel());
-        $this->assertSame($action->getLabel(), $action->getTooltip());
+        $this->assertFalse($action->isIconButton());
+        $this->assertTrue($action->isButton());
+        $this->assertNull($action->getTooltip());
     }
 
-    public function test_page_delete_action_uses_icon_button_with_label_tooltip(): void
+    public function test_table_create_action_is_not_configured_as_icon_button(): void
+    {
+        $action = TableCreateAction::make();
+
+        $this->assertFalse($action->isIconButton());
+        $this->assertNull($action->getTooltip());
+    }
+
+    public function test_page_delete_action_keeps_default_button_with_visible_label(): void
     {
         $action = DeleteAction::make();
 
-        $this->assertTrue($action->isIconButton());
-        $this->assertSame(__('filament-actions::delete.single.label'), $action->getTooltip());
+        $this->assertFalse($action->isIconButton());
+        $this->assertTrue($action->isButton());
+        $this->assertNull($action->getTooltip());
     }
 
     public function test_bulk_action_base_class_is_configured(): void

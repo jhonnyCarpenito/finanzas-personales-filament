@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\CreateAction as TableCreateAction;
 use Filament\Tables\View\TablesRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\URL;
@@ -71,9 +70,9 @@ class AppServiceProvider extends ServiceProvider
 
     private function configureFilamentIconButtonActionsWithTooltips(): void
     {
-        $configure = function (TableAction|BulkAction|CreateAction|DeleteAction $action): void {
+        $configureIconButtonWithTooltip = function (TableAction|BulkAction $action): void {
             $action->iconButton();
-            $action->tooltip(function (TableAction|BulkAction|CreateAction|DeleteAction $action): ?string {
+            $action->tooltip(function (TableAction|BulkAction $action): ?string {
                 $label = $action->getLabel();
 
                 if ($label instanceof Htmlable) {
@@ -84,9 +83,14 @@ class AppServiceProvider extends ServiceProvider
             });
         };
 
-        TableAction::configureUsing($configure);
-        BulkAction::configureUsing($configure);
-        CreateAction::configureUsing($configure);
-        DeleteAction::configureUsing($configure);
+        TableAction::configureUsing(function (TableAction $action) use ($configureIconButtonWithTooltip): void {
+            if ($action instanceof TableCreateAction) {
+                return;
+            }
+
+            $configureIconButtonWithTooltip($action);
+        });
+
+        BulkAction::configureUsing($configureIconButtonWithTooltip);
     }
 }
