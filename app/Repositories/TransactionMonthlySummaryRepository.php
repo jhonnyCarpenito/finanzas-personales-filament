@@ -27,7 +27,7 @@ final class TransactionMonthlySummaryRepository
         $this->applyDateRangeFilter($query, $start, $end);
 
         return $query
-            ->selectRaw("{$yearMonthExpression} as year_month")
+            ->selectRaw("{$yearMonthExpression} as `year_month`")
             ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income")
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense")
             ->groupByRaw($yearMonthExpression)
