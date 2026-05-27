@@ -18,6 +18,7 @@ Sistema SaaS de gestión de finanzas personales con panel de administración mod
 - [Seguridad y permisos](#seguridad-y-permisos)
 - [Comandos útiles](#comandos-útiles)
 - [Despliegue en CapRover](#despliegue-en-caprover)
+- [Documentación](#documentación)
 - [Especificaciones](#especificaciones)
 - [Licencia](#licencia)
 
@@ -27,7 +28,7 @@ Sistema SaaS de gestión de finanzas personales con panel de administración mod
 
 Aplicación web que permite a los usuarios registrar **ingresos** y **egresos**, clasificarlos con **etiquetas** (tags) y consultar un **dashboard** con estadísticas y gráficos. Los administradores pueden gestionar usuarios, etiquetas globales y ver todas las transacciones del sistema. El diseño sigue un modelo **multi-tenant**: cada usuario solo accede a sus propios datos, salvo los administradores.
 
-El proyecto fue implementado según las especificaciones del documento **`app_spec.md`** (Tech Spec).
+El proyecto fue implementado según las especificaciones del documento **[`documentation/specs/app-spec.md`](documentation/specs/app-spec.md)** (Tech Spec).
 
 ---
 
@@ -154,13 +155,16 @@ Al entrar en Transacciones, por defecto se muestran las del **mes actual**; pued
 
 ## Credenciales por defecto
 
-Tras ejecutar los seeders, existe un usuario administrador de prueba:
+Tras ejecutar los seeders (`php artisan db:seed`), hay dos cuentas de prueba. Detalle completo: **[documentation/development/local-credentials.md](documentation/development/local-credentials.md)**.
 
-| Rol   | Email           | Contraseña |
-|-------|-----------------|------------|
+| Rol | Email | Contraseña |
+|-----|-------|------------|
 | Admin | `admin@admin.com` | `password` |
+| Usuario regular | `prueba@ejemplo.com` | `password` |
 
-**Importante:** cambia esta contraseña en entornos de producción.
+Panel: `http://localhost:8000/admin`
+
+**Importante:** cambia estas contraseñas en producción.
 
 ---
 
@@ -239,13 +243,26 @@ Sesiones, caché y colas usan **database** por defecto (tablas `sessions`, `cach
 
 ## Despliegue en CapRover
 
-El proyecto incluye **Dockerfile**, configuración **Nginx** y **captain-definition** para desplegar en [CapRover](https://caprover.com/). Guía paso a paso: **[DEPLOYMENT-CAPROVER.md](DEPLOYMENT-CAPROVER.md)**.
+El proyecto incluye **Dockerfile**, configuración **Nginx** y **captain-definition** para desplegar en [CapRover](https://caprover.com/). Guía paso a paso: **[documentation/deployment/caprover.md](documentation/deployment/caprover.md)**.
+
+---
+
+## Documentación
+
+Toda la documentación del proyecto está en la carpeta **[`documentation/`](documentation/)**:
+
+| Documento | Descripción |
+|-----------|-------------|
+| [specs/app-spec.md](documentation/specs/app-spec.md) | Especificación técnica (Tech Spec) |
+| [deployment/caprover.md](documentation/deployment/caprover.md) | Despliegue en CapRover |
+| [development/installed-skills.md](documentation/development/installed-skills.md) | Skills y reglas de IA (Cursor / Warp) |
+| [development/local-credentials.md](documentation/development/local-credentials.md) | Credenciales locales (admin y usuario de prueba) |
 
 ---
 
 ## Especificaciones
 
-El diseño y la implementación siguen el documento **`app_spec.md`** (Tech Spec), que define:
+El diseño y la implementación siguen el documento **[`documentation/specs/app-spec.md`](documentation/specs/app-spec.md)** (Tech Spec), que define:
 
 - Esquema de base de datos (users, tags, transactions, tag_transaction).
 - Modelos Eloquent y relaciones.
@@ -260,4 +277,4 @@ La versión actual del proyecto utiliza **Laravel 12** (el spec original mencion
 
 ## Licencia
 
-Este proyecto fue desarrollado según las especificaciones del archivo `app_spec.md`. Consulta el repositorio o al autor para más detalles de licencia.
+Este proyecto fue desarrollado según las especificaciones del archivo [`documentation/specs/app-spec.md`](documentation/specs/app-spec.md). Consulta el repositorio o al autor para más detalles de licencia.

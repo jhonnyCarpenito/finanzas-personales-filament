@@ -35,7 +35,7 @@ Personal finance management SaaS built with Laravel 12 + Filament v3.2. Users tr
 
 ## Deployment
 - Docker multi-stage: Node (frontend build) → Composer (deps) → PHP 8.2-fpm + Nginx
-- CapRover for deployment (see `captain-definition` and `DEPLOYMENT-CAPROVER.md`)
+- CapRover for deployment (see `captain-definition` and `documentation/deployment/caprover.md`)
 
 ## Dev Commands
 - `composer dev` - Start server + queue + logs + vite concurrently
