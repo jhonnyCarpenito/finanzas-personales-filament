@@ -7,6 +7,7 @@ namespace Tests\Unit\Repositories;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Repositories\TransactionMonthlySummaryRepository;
+use Illuminate\Database\Query\Grammars\MySqlGrammar;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -152,6 +153,31 @@ final class TransactionMonthlySummaryRepositoryTest extends TestCase
         $user = User::factory()->create(['is_admin' => false]);
 
         $this->assertNull($this->repository->findEarliestTransactionYear($user->id));
+    }
+
+    public function test_mysql_query_uses_quoted_date_range_and_backticked_date_column(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['is_admin' => false]);
+
+        $query = Transaction::query()
+            ->where('user_id', $user->id)
+            ->where('date', '>=', '2026-01-01')
+            ->where('date', '<=', '2026-12-31')
+            ->selectRaw("DATE_FORMAT(`date`, '%Y-%m') as year_month")
+            ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income")
+            ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense")
+            ->groupByRaw("DATE_FORMAT(`date`, '%Y-%m')")
+            ->orderByRaw("DATE_FORMAT(`date`, '%Y-%m') DESC");
+
+        $query->getConnection()->setQueryGrammar(new MySqlGrammar($query->getConnection()));
+
+        $sql = $query->toRawSql();
+
+        $this->assertStringContainsString("'2026-01-01'", $sql);
+        $this->assertStringContainsString("'2026-12-31'", $sql);
+        $this->assertStringContainsString("DATE_FORMAT(`date`, '%Y-%m')", $sql);
+        $this->assertStringNotContainsString('date(`date`) >= 2026-01-01', $sql);
     }
 
     public function test_find_earliest_transaction_year_returns_year_of_oldest_transaction(): void
