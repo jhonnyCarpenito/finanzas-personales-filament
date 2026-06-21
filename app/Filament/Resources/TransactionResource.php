@@ -9,6 +9,7 @@ use App\Enums\TransactionType;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Models\Tag;
 use App\Models\Transaction;
+use App\Support\TransactionDateRangeFilter;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -164,11 +165,9 @@ class TransactionResource extends Resource
                         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
                         $end = (clone $start)->endOfMonth();
 
-                        // Use whereDate (not whereBetween on raw Y-m-d strings): SQLite stores dates as
-                        // "YYYY-MM-DD HH:MM:SS", and lexical BETWEEN excludes the last day of the month.
-                        return $query
-                            ->whereDate('date', '>=', $start->toDateString())
-                            ->whereDate('date', '<=', $end->toDateString());
+                        TransactionDateRangeFilter::apply($query, $start, $end);
+
+                        return $query;
                     }),
                 SelectFilter::make('tags')
                     ->label('Etiquetas')
@@ -191,15 +190,21 @@ class TransactionResource extends Resource
                             ->label('Hasta'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['date_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date', '>=', $date),
-                            )
-                            ->when(
-                                $data['date_to'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date', '<=', $date),
+                        if ($data['date_from'] ?? null) {
+                            TransactionDateRangeFilter::applyFromStrings(
+                                $query,
+                                (string) $data['date_from'],
                             );
+                        }
+
+                        if ($data['date_to'] ?? null) {
+                            TransactionDateRangeFilter::applyUpperBound(
+                                $query,
+                                (string) $data['date_to'],
+                            );
+                        }
+
+                        return $query;
                     }),
             ])
             ->actions([

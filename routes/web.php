@@ -3,9 +3,7 @@
 use App\Http\Controllers\Auth\SocialiteController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'welcome');
 
 Route::middleware('web')->group(function (): void {
     Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])

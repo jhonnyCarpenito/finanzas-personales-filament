@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
+use App\Models\FundOrigin;
+use App\Models\Transaction;
+use App\Observers\FundOriginDashboardCacheObserver;
+use App\Observers\TransactionDashboardCacheObserver;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
@@ -33,6 +37,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Transaction::observe(TransactionDashboardCacheObserver::class);
+        FundOrigin::observe(FundOriginDashboardCacheObserver::class);
+
         $this->configureFilamentIconButtonActionsWithTooltips();
 
         FilamentColor::register([

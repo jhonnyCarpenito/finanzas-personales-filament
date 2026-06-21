@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Models\FundOrigin;
+use App\Support\DashboardCache;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -27,8 +28,21 @@ class CapitalPieChartWidget extends ChartWidget
 
     protected function getData(): array
     {
+        $userId = (int) Auth::id();
+
+        return DashboardCache::rememberCapitalPie(
+            $userId,
+            fn (): array => $this->buildChartData($userId),
+        );
+    }
+
+    /**
+     * @return array{datasets: array<int, array<string, mixed>>, labels: array<int, string>}
+     */
+    private function buildChartData(int $userId): array
+    {
         $origins = FundOrigin::query()
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
             ->orderBy('order')
             ->orderBy('name')
             ->get(['name', 'amount', 'color']);

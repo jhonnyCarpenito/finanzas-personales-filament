@@ -40,6 +40,7 @@ FROM php:8.2-fpm-bookworm
 
 # System deps + PHP extensions for Laravel + Filament (intl)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    $PHPIZE_DEPS \
     nginx \
     libpng-dev \
     libzip-dev \
@@ -63,6 +64,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zip \
         opcache \
         intl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Nginx runs as www-data; PHP-FPM also

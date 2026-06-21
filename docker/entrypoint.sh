@@ -17,10 +17,12 @@ php artisan db:seed --force --no-interaction || true
 # Artisan se ejecuta como root; asegurar que storage y cache sean escribibles por www-data (PHP-FPM/Nginx)
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Cache config and routes (optional; uncomment if env is fully set at build time)
-# php artisan config:cache
-# php artisan route:cache
-# php artisan view:cache
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+php artisan filament:cache-components
+php artisan icons:cache
 
 # Start PHP-FPM in background, then Nginx in foreground
 php-fpm &

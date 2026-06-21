@@ -6,6 +6,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\FundOrigin;
 use App\Models\Transaction;
+use App\Support\DashboardCache;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,18 @@ class FinanceStatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $userId = Auth::id();
+        $userId = (int) Auth::id();
+
+        $metrics = DashboardCache::rememberFinanceStats($userId, fn (): array => $this->queryMetrics($userId));
+
+        return $this->buildStatsFromMetrics($metrics);
+    }
+
+    /**
+     * @return array{balance: float, monthlyIncome: float, monthlyExpense: float, capitalTotal: float, monthLabel: string}
+     */
+    private function queryMetrics(int $userId): array
+    {
         $currentMonth = now()->month;
         $currentYear = now()->year;
 
@@ -49,19 +61,40 @@ class FinanceStatsOverview extends BaseWidget
             ->sum('amount');
 
         return [
-            Stat::make('Saldo Total', '$' . number_format($balance, 2))
+            'balance' => $balance,
+            'monthlyIncome' => $monthlyIncome,
+            'monthlyExpense' => $monthlyExpense,
+            'capitalTotal' => $capitalTotal,
+            'monthLabel' => now()->format('F Y'),
+        ];
+    }
+
+    /**
+     * @param  array{balance: float, monthlyIncome: float, monthlyExpense: float, capitalTotal: float, monthLabel: string}  $metrics
+     * @return array<int, Stat>
+     */
+    private function buildStatsFromMetrics(array $metrics): array
+    {
+        $balance = $metrics['balance'];
+        $monthlyIncome = $metrics['monthlyIncome'];
+        $monthlyExpense = $metrics['monthlyExpense'];
+        $capitalTotal = $metrics['capitalTotal'];
+        $monthLabel = $metrics['monthLabel'];
+
+        return [
+            Stat::make('Saldo Total', '$'.number_format($balance, 2))
                 ->description('Total de ingresos menos egresos')
                 ->color($balance >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-currency-dollar'),
-            Stat::make('Ingresos del Mes', '$' . number_format($monthlyIncome, 2))
-                ->description(now()->format('F Y'))
+            Stat::make('Ingresos del Mes', '$'.number_format($monthlyIncome, 2))
+                ->description($monthLabel)
                 ->color('success')
                 ->icon('heroicon-o-arrow-trending-up'),
-            Stat::make('Gastos del Mes', '$' . number_format($monthlyExpense, 2))
-                ->description(now()->format('F Y'))
+            Stat::make('Gastos del Mes', '$'.number_format($monthlyExpense, 2))
+                ->description($monthLabel)
                 ->color('danger')
                 ->icon('heroicon-o-arrow-trending-down'),
-            Stat::make('Capital Total', '$' . number_format($capitalTotal, 2))
+            Stat::make('Capital Total', '$'.number_format($capitalTotal, 2))
                 ->description('Suma de orígenes de fondos')
                 ->color($capitalTotal >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-banknotes'),
