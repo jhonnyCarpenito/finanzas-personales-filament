@@ -6,12 +6,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\FilamentPanelRoutes;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
+use Laravel\Socialite\Facades\Socialite;
 
 final class SocialiteController extends Controller
 {
@@ -47,14 +48,14 @@ final class SocialiteController extends Controller
         $user = $this->findOrCreateUser($socialiteUser, $provider);
 
         if ($user->isBlocked()) {
-            return redirect()->route('filament.admin.auth.login')
+            return redirect()->route(FilamentPanelRoutes::loginRoute($user))
                 ->with('error', __('Tu cuenta ha sido bloqueada. Contacta al administrador.'));
         }
 
         Auth::login($user, remember: true);
         session()->regenerate();
 
-        return redirect()->intended(route('filament.admin.pages.dashboard'));
+        return redirect()->intended(route(FilamentPanelRoutes::dashboardRoute($user)));
     }
 
     private function handleLinkAccount(SocialiteUser $socialiteUser): RedirectResponse
@@ -62,12 +63,12 @@ final class SocialiteController extends Controller
         $user = Auth::user();
 
         if (! $user instanceof User) {
-            return redirect()->route('filament.admin.auth.login');
+            return redirect()->route(FilamentPanelRoutes::loginRouteForCurrentPanel());
         }
 
         $existingUser = User::where('google_id', $socialiteUser->getId())->first();
         if ($existingUser && $existingUser->id !== $user->id) {
-            return redirect()->route('filament.admin.pages.dashboard')
+            return redirect()->route(FilamentPanelRoutes::dashboardRoute($user))
                 ->with('error', __('Esta cuenta de Google ya está asociada a otro usuario.'));
         }
 
@@ -76,7 +77,7 @@ final class SocialiteController extends Controller
             'google_email' => $socialiteUser->getEmail(),
         ]);
 
-        return redirect()->route('filament.admin.auth.profile')
+        return redirect()->route(FilamentPanelRoutes::profileRoute())
             ->with('success', __('Cuenta de Google asociada correctamente.'));
     }
 
@@ -92,7 +93,7 @@ final class SocialiteController extends Controller
 
         if ($user) {
             $user->update([
-                $provider . '_id' => $socialiteUser->getId(),
+                $provider.'_id' => $socialiteUser->getId(),
                 'google_email' => $socialiteUser->getEmail(),
             ]);
 

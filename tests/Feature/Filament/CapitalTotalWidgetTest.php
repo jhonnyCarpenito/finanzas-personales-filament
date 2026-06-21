@@ -23,6 +23,8 @@ final class CapitalTotalWidgetTest extends TestCase
 
         $this->actingAs($user);
 
+        $this->setFilamentPanel('app');
+
         Livewire::test(CapitalTotalWidget::class)
             ->call('toggleAmountVisibility')
             ->assertDispatched(CapitalTotalWidget::AMOUNT_VISIBILITY_CHANGED_EVENT);
@@ -36,6 +38,8 @@ final class CapitalTotalWidgetTest extends TestCase
         FundOrigin::factory()->create(['user_id' => $user->id, 'amount' => 100]);
 
         $this->actingAs($user);
+
+        $this->setFilamentPanel('app');
 
         $component = Livewire::test(CapitalTotalWidget::class);
 

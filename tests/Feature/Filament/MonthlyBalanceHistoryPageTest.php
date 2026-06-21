@@ -19,6 +19,13 @@ final class MonthlyBalanceHistoryPageTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->setFilamentPanel('app');
+    }
+
     public function test_admin_cannot_access_page_and_regular_user_can(): void
     {
         /** @var User $admin */
@@ -133,7 +140,7 @@ final class MonthlyBalanceHistoryPageTest extends TestCase
                             'month' => '2026-04',
                         ],
                     ],
-                ]),
+                ], panel: 'app'),
                 $record,
             );
 

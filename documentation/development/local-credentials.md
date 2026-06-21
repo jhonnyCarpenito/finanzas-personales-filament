@@ -10,7 +10,8 @@ After running `php artisan serve`:
 
 | Environment | URL |
 |-------------|-----|
-| Filament admin panel | `http://localhost:8000/admin` |
+| Filament app panel (regular users) | `http://localhost:8000/app` |
+| Filament admin panel (administrators) | `http://localhost:8000/admin` |
 
 ## Seed the database
 

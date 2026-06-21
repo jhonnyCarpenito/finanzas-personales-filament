@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\FilamentPanelRoutes;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,7 @@ class CheckUserBlocked
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('filament.admin.auth.login')
+            return redirect()->route(FilamentPanelRoutes::loginRouteForCurrentPanel())
                 ->with('error', 'Tu cuenta ha sido bloqueada. Contacta al administrador.');
         }
 

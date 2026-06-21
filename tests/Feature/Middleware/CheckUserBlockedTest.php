@@ -22,18 +22,18 @@ class CheckUserBlockedTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(TransactionResource::getUrl('index'));
+        $response = $this->get(TransactionResource::getUrl('index', panel: 'app'));
     }
 
     public function test_non_blocked_user_is_not_redirected_by_middleware(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => false]);
 
         $this->actingAs($user);
 
-        $response = $this->get(TransactionResource::getUrl('index'));
+        $response = $this->get(TransactionResource::getUrl('index', panel: 'app'));
 
-        $this->assertNotSame(route('filament.admin.auth.login'), $response->headers->get('Location'));
+        $this->assertNotSame(route('filament.app.auth.login'), $response->headers->get('Location'));
         $this->assertAuthenticatedAs($user);
     }
 }

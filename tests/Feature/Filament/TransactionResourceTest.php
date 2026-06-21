@@ -112,6 +112,8 @@ class TransactionResourceTest extends TestCase
         ]);
         $transaction->tags()->sync([$tagA->id, $tagB->id]);
 
+        $this->setFilamentPanel('app');
+
         Livewire::test(ListTransactions::class)
             ->set('tableFilters', [
                 'month' => [

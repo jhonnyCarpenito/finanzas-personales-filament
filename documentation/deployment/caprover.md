@@ -127,8 +127,8 @@ Elige la app (ej. `finanzas-personales`) cuando lo pida. CapRover enviará el co
 
 ## Paso 7: Comprobar que todo funciona
 
-1. Abre `https://tu-dominio-asignado/admin`.
-2. Deberías ver la pantalla de login de Filament.
+1. Abre `https://tu-dominio-asignado/app` (usuarios regulares) o `https://tu-dominio-asignado/admin` (administradores).
+2. Deberías ver la pantalla de login de Filament correspondiente a tu rol.
 3. Los seeders se ejecutan al arrancar (admin, usuario de prueba, tags globales y transacciones de ejemplo para el usuario de prueba). Cuentas: **Admin** `admin@admin.com` / `password`; **Usuario de prueba** (sin permisos admin) `prueba@ejemplo.com` / `password`. Cambia las contraseñas en producción.
 
 Si algo falla, revisa los **logs** de la app en CapRover (Logs) y que todas las variables de entorno estén bien (sobre todo `APP_KEY` y `APP_URL`).

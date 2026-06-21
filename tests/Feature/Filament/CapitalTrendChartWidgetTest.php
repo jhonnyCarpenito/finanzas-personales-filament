@@ -16,6 +16,13 @@ final class CapitalTrendChartWidgetTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->setFilamentPanel('app');
+    }
+
     public function test_admin_cannot_view_widget_and_regular_user_can_view_it(): void
     {
         /** @var User $admin */

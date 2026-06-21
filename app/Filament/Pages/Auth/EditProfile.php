@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
+use App\Support\FilamentPanelRoutes;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\View;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Auth;
 use Filament\Pages\Auth\EditProfile as BaseEditProfile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 
 final class EditProfile extends BaseEditProfile
@@ -69,7 +70,7 @@ final class EditProfile extends BaseEditProfile
                     ->operation('edit')
                     ->model($this->getUser())
                     ->statePath('data')
-                    ->inlineLabel(! static::isSimple()),
+                    ->inlineLabel(! self::isSimple()),
             ),
         ];
     }
@@ -84,6 +85,6 @@ final class EditProfile extends BaseEditProfile
             ->title(__('Cuenta de Google desvinculada'))
             ->send();
 
-        $this->redirect(route('filament.admin.auth.profile'));
+        $this->redirect(route(FilamentPanelRoutes::profileRoute()));
     }
 }

@@ -138,9 +138,12 @@ En desarrollo puedes usar `npm run dev` en lugar de `npm run build`.
 php artisan serve
 ```
 
-La aplicación quedará disponible en `http://localhost:8000`. El panel de administración está en:
+La aplicación quedará disponible en `http://localhost:8000`. Los paneles Filament están en:
 
-**`http://localhost:8000/admin`**
+| Rol | URL |
+|-----|-----|
+| Usuario regular | **`http://localhost:8000/app`** |
+| Administrador | **`http://localhost:8000/admin`** |
 
 ---
 
@@ -162,7 +165,7 @@ Tras ejecutar los seeders (`php artisan db:seed`), hay dos cuentas de prueba. De
 | Admin | `admin@admin.com` | `password` |
 | Usuario regular | `prueba@ejemplo.com` | `password` |
 
-Panel: `http://localhost:8000/admin`
+Panel: `http://localhost:8000/app` (usuario regular) o `http://localhost:8000/admin` (administrador)
 
 **Importante:** cambia estas contraseñas en producción.
 

@@ -25,6 +25,8 @@ final class ListTransactionsSelectedSumTest extends TestCase
 
         $this->actingAs($user);
 
+        $this->setFilamentPanel('app');
+
         Livewire::test(ListTransactions::class)
             ->call('sumSelectedTransactions', [
                 (string) $ownedIncome->id,
@@ -42,6 +44,8 @@ final class ListTransactionsSelectedSumTest extends TestCase
     {
         $user = User::factory()->create(['is_admin' => false]);
         $this->actingAs($user);
+
+        $this->setFilamentPanel('app');
 
         Livewire::test(ListTransactions::class)
             ->call('sumSelectedTransactions', [])
