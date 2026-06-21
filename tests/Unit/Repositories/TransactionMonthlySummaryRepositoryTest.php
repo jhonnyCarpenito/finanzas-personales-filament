@@ -160,15 +160,17 @@ final class TransactionMonthlySummaryRepositoryTest extends TestCase
         /** @var User $user */
         $user = User::factory()->create(['is_admin' => false]);
 
+        $yearMonthExpression = "DATE_FORMAT(`date`, '%Y-%m')";
+
         $query = Transaction::query()
             ->where('user_id', $user->id)
             ->where('date', '>=', '2026-01-01')
             ->where('date', '<=', '2026-12-31')
-            ->selectRaw("DATE_FORMAT(`date`, '%Y-%m') as year_month")
+            ->selectRaw("{$yearMonthExpression} as `year_month`")
             ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income")
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense")
-            ->groupByRaw("DATE_FORMAT(`date`, '%Y-%m')")
-            ->orderByRaw("DATE_FORMAT(`date`, '%Y-%m') DESC");
+            ->groupByRaw($yearMonthExpression)
+            ->orderByRaw("{$yearMonthExpression} DESC");
 
         $query->getConnection()->setQueryGrammar(new MySqlGrammar($query->getConnection()));
 
@@ -177,6 +179,7 @@ final class TransactionMonthlySummaryRepositoryTest extends TestCase
         $this->assertStringContainsString("'2026-01-01'", $sql);
         $this->assertStringContainsString("'2026-12-31'", $sql);
         $this->assertStringContainsString("DATE_FORMAT(`date`, '%Y-%m')", $sql);
+        $this->assertStringContainsString('as `year_month`', $sql);
         $this->assertStringNotContainsString('date(`date`) >= 2026-01-01', $sql);
     }
 

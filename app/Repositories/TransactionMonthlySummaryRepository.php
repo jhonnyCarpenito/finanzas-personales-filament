@@ -27,30 +27,12 @@ final class TransactionMonthlySummaryRepository
         TransactionDateRangeFilter::apply($query, $start, $end);
 
         return $query
-            ->selectRaw("{$yearMonthExpression} as year_month")
+            ->selectRaw("{$yearMonthExpression} as `year_month`")
             ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income")
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense")
             ->groupByRaw($yearMonthExpression)
             ->orderByRaw("{$yearMonthExpression} DESC")
             ->get();
-    }
-
-    private function applyDateRangeFilter(Builder $query, Carbon $start, Carbon $end): void
-    {
-        $startDate = $start->toDateString();
-        $endDate = $end->toDateString();
-
-        if (DB::getDriverName() === 'sqlite') {
-            $query
-                ->whereDate('date', '>=', $startDate)
-                ->whereDate('date', '<=', $endDate);
-
-            return;
-        }
-
-        $query
-            ->where('date', '>=', $startDate)
-            ->where('date', '<=', $endDate);
     }
 
     public function findEarliestTransactionYear(int $userId): ?int
