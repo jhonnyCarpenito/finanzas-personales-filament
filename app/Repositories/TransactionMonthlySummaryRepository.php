@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Transaction;
+use App\Support\TransactionDateRangeFilter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -20,10 +21,12 @@ final class TransactionMonthlySummaryRepository
         $end = Carbon::create($year, 12, 31)->endOfYear();
         $yearMonthExpression = $this->yearMonthExpression();
 
-        return Transaction::query()
-            ->where('user_id', $userId)
-            ->whereDate('date', '>=', $start->toDateString())
-            ->whereDate('date', '<=', $end->toDateString())
+        $query = Transaction::query()
+            ->where('user_id', $userId);
+
+        TransactionDateRangeFilter::apply($query, $start, $end);
+
+        return $query
             ->selectRaw("{$yearMonthExpression} as year_month")
             ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income")
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense")

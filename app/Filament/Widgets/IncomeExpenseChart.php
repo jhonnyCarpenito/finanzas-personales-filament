@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Models\Transaction;
+use App\Support\DashboardCache;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,9 +24,21 @@ class IncomeExpenseChart extends ChartWidget
 
     protected function getData(): array
     {
-        $userId = Auth::id();
+        $userId = (int) Auth::id();
         $currentYear = now()->year;
 
+        return DashboardCache::rememberIncomeExpenseChart(
+            $userId,
+            $currentYear,
+            fn (): array => $this->buildChartData($userId, $currentYear),
+        );
+    }
+
+    /**
+     * @return array{datasets: array<int, array<string, mixed>>, labels: array<int, string>}
+     */
+    private function buildChartData(int $userId, int $currentYear): array
+    {
         $isSqlite = DB::getDriverName() === 'sqlite';
         $monthFn = $isSqlite ? "CAST(strftime('%m', date) AS INTEGER)" : 'MONTH(date)';
 

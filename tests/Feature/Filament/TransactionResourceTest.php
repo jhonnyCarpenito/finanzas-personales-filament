@@ -108,11 +108,16 @@ class TransactionResourceTest extends TestCase
             'type' => 'expense',
             'amount' => 98.50,
             'concept' => 'Servicio de internet',
-            'date' => '2026-04-12',
+            'date' => now()->format('Y-m-d'),
         ]);
         $transaction->tags()->sync([$tagA->id, $tagB->id]);
 
         Livewire::test(ListTransactions::class)
+            ->set('tableFilters', [
+                'month' => [
+                    'month' => now()->format('Y-m'),
+                ],
+            ])
             ->callTableAction('duplicate', $transaction);
 
         $this->assertDatabaseCount('transactions', 2);
@@ -126,7 +131,7 @@ class TransactionResourceTest extends TestCase
         $this->assertNotNull($duplicate);
         $this->assertSame('expense', $duplicate->type->value);
         $this->assertSame('98.50', $duplicate->amount);
-        $this->assertSame('2026-04-12', $duplicate->date->toDateString());
+        $this->assertSame(now()->format('Y-m-d'), $duplicate->date->toDateString());
         $this->assertEqualsCanonicalizing([$tagA->id, $tagB->id], $duplicate->tags()->pluck('tags.id')->all());
     }
 }
