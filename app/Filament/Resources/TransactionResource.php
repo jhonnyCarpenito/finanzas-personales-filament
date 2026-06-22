@@ -135,7 +135,7 @@ class TransactionResource extends Resource
                 Tables\Columns\TextColumn::make('tags.name')
                     ->label('Etiquetas')
                     ->badge()
-                    ->separator(','),
+                    ->color(fn (string $state, Transaction $record): string => $record->tags->firstWhere('name', $state)?->color ?: 'gray'),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
                     ->badge(),

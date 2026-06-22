@@ -87,6 +87,43 @@ class TransactionResourceTest extends TestCase
         $this->assertSame(1, $whereDateCount);
     }
 
+    public function test_transaction_table_renders_tags_with_their_assigned_colors(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $this->actingAs($user);
+
+        $coloredTag = Tag::query()->create([
+            'name' => 'Comida',
+            'color' => 'danger',
+            'user_id' => null,
+        ]);
+        $uncoloredTag = Tag::query()->create([
+            'name' => 'Otros',
+            'color' => null,
+            'user_id' => $user->id,
+        ]);
+
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'date' => now()->format('Y-m-d'),
+        ]);
+        $transaction->tags()->sync([$coloredTag->id, $uncoloredTag->id]);
+
+        $this->setFilamentPanel('app');
+
+        Livewire::test(ListTransactions::class)
+            ->set('tableFilters', [
+                'month' => [
+                    'month' => now()->format('Y-m'),
+                ],
+            ])
+            ->assertCanRenderTableColumn('tags.name')
+            ->assertSee('Comida')
+            ->assertSee('Otros')
+            ->assertSeeHtml('fi-color-danger')
+            ->assertSeeHtml('fi-color-gray');
+    }
+
     public function test_duplicate_table_action_creates_a_new_transaction_with_same_data_and_tags(): void
     {
         $user = User::factory()->create(['is_admin' => false]);
