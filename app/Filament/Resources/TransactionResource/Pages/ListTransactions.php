@@ -9,6 +9,7 @@ use App\Filament\Resources\TransactionResource;
 use App\Models\Transaction;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\View\View;
 
 class ListTransactions extends ListRecords
 {
@@ -32,6 +33,19 @@ class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('tagAmountChart')
+                ->label('Gráfico por etiquetas')
+                ->icon('heroicon-o-chart-bar')
+                ->color('gray')
+                ->authorize('viewAny', Transaction::class)
+                ->modalHeading('Montos acumulados por etiqueta')
+                ->modalDescription('Los montos reflejan los filtros aplicados en la tabla.')
+                ->modalWidth('4xl')
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Cerrar')
+                ->modalContent(fn (): View => view('filament.transactions.tag-amounts-chart-modal', [
+                    'tableFilters' => $this->tableFilters,
+                ])),
             Actions\CreateAction::make(),
         ];
     }

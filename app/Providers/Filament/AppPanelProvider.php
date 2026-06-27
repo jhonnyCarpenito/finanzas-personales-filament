@@ -13,6 +13,7 @@ use App\Filament\Widgets\CapitalTotalWidget;
 use App\Filament\Widgets\CapitalTrendChartWidget;
 use App\Filament\Widgets\FinanceStatsOverview;
 use App\Filament\Widgets\IncomeExpenseChart;
+use App\Filament\Widgets\TransactionTagAmountsChartWidget;
 use App\Providers\Filament\Concerns\ConfiguresFilamentPanels;
 use Filament\Pages;
 use Filament\Panel;
@@ -50,6 +51,9 @@ final class AppPanelProvider extends PanelProvider
                 CapitalPieChartWidget::class,
                 CapitalTrendChartWidget::class,
                 Widgets\AccountWidget::class,
+            ])
+            ->livewireComponents([
+                TransactionTagAmountsChartWidget::class,
             ]);
     }
 }

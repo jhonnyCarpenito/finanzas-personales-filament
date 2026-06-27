@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
+use App\Filament\Widgets\TransactionTagAmountsChartWidget;
 use App\Models\FundOrigin;
 use App\Models\Transaction;
 use App\Observers\FundOriginDashboardCacheObserver;
@@ -37,6 +38,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Livewire::component(
+            'app.filament.widgets.transaction-tag-amounts-chart-widget',
+            TransactionTagAmountsChartWidget::class,
+        );
+
         Transaction::observe(TransactionDashboardCacheObserver::class);
         FundOrigin::observe(FundOriginDashboardCacheObserver::class);
 
