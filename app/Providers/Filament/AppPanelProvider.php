@@ -8,6 +8,7 @@ use App\Filament\Pages\MonthlyBalanceHistoryPage;
 use App\Filament\Resources\FundOriginResource;
 use App\Filament\Resources\TagResource;
 use App\Filament\Resources\TransactionResource;
+use App\Filament\Resources\TransactionResource\Widgets\TransactionFilterStatsOverview;
 use App\Filament\Widgets\CapitalPieChartWidget;
 use App\Filament\Widgets\CapitalTotalWidget;
 use App\Filament\Widgets\CapitalTrendChartWidget;
@@ -54,6 +55,7 @@ final class AppPanelProvider extends PanelProvider
             ])
             ->livewireComponents([
                 TransactionTagAmountsChartWidget::class,
+                TransactionFilterStatsOverview::class,
             ]);
     }
 }

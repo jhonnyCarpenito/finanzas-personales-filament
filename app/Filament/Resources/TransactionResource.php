@@ -265,6 +265,13 @@ class TransactionResource extends Resource
         ];
     }
 
+    public static function getWidgets(): array
+    {
+        return [
+            TransactionResource\Widgets\TransactionFilterStatsOverview::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [

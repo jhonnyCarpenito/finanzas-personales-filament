@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
+use App\Filament\Resources\TransactionResource\Widgets\TransactionFilterStatsOverview;
 use App\Filament\Widgets\TransactionTagAmountsChartWidget;
 use App\Models\FundOrigin;
 use App\Models\Transaction;
@@ -41,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component(
             'app.filament.widgets.transaction-tag-amounts-chart-widget',
             TransactionTagAmountsChartWidget::class,
+        );
+
+        Livewire::component(
+            'app.filament.resources.transaction-resource.widgets.transaction-filter-stats-overview',
+            TransactionFilterStatsOverview::class,
         );
 
         Transaction::observe(TransactionDashboardCacheObserver::class);

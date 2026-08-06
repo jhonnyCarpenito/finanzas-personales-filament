@@ -6,13 +6,17 @@ namespace App\Filament\Resources\TransactionResource\Pages;
 
 use App\Enums\TransactionType;
 use App\Filament\Resources\TransactionResource;
+use App\Filament\Resources\TransactionResource\Widgets\TransactionFilterStatsOverview;
 use App\Models\Transaction;
 use Filament\Actions;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\View\View;
 
 class ListTransactions extends ListRecords
 {
+    use ExposesTableToWidgets;
+
     protected static string $resource = TransactionResource::class;
 
     public function mount(): void
@@ -28,6 +32,13 @@ class ListTransactions extends ListRecords
                 ],
             ];
         }
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            TransactionFilterStatsOverview::class,
+        ];
     }
 
     protected function getHeaderActions(): array
