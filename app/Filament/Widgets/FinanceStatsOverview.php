@@ -6,6 +6,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\FundOrigin;
 use App\Models\Transaction;
+use App\Support\CapitalAmountDisplay;
 use App\Support\DashboardCache;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -14,6 +15,16 @@ use Illuminate\Support\Facades\DB;
 
 class FinanceStatsOverview extends BaseWidget
 {
+    /**
+     * @var view-string
+     */
+    protected static string $view = 'filament.widgets.finance-stats-overview';
+
+    public function mount(): void
+    {
+        CapitalAmountDisplay::ensureDefaultVisibility();
+    }
+
     protected function getColumns(): int
     {
         return 4;
@@ -22,6 +33,19 @@ class FinanceStatsOverview extends BaseWidget
     public static function canView(): bool
     {
         return Auth::check() && ! Auth::user()->is_admin;
+    }
+
+    public function toggleAmountVisibility(): void
+    {
+        CapitalAmountDisplay::toggle();
+        $this->cachedStats = null;
+
+        $this->dispatch(CapitalAmountDisplay::VISIBILITY_CHANGED_EVENT);
+    }
+
+    public function isAmountVisible(): bool
+    {
+        return CapitalAmountDisplay::isVisible();
     }
 
     protected function getStats(): array
@@ -82,19 +106,19 @@ class FinanceStatsOverview extends BaseWidget
         $monthLabel = $metrics['monthLabel'];
 
         return [
-            Stat::make('Saldo Total', '$'.number_format($balance, 2))
+            Stat::make('Saldo Total', CapitalAmountDisplay::formatUsingSession($balance))
                 ->description('Total de ingresos menos egresos')
                 ->color($balance >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-currency-dollar'),
-            Stat::make('Ingresos del Mes', '$'.number_format($monthlyIncome, 2))
+            Stat::make('Ingresos del Mes', CapitalAmountDisplay::formatUsingSession($monthlyIncome))
                 ->description($monthLabel)
                 ->color('success')
                 ->icon('heroicon-o-arrow-trending-up'),
-            Stat::make('Gastos del Mes', '$'.number_format($monthlyExpense, 2))
+            Stat::make('Gastos del Mes', CapitalAmountDisplay::formatUsingSession($monthlyExpense))
                 ->description($monthLabel)
                 ->color('danger')
                 ->icon('heroicon-o-arrow-trending-down'),
-            Stat::make('Capital Total', '$'.number_format($capitalTotal, 2))
+            Stat::make('Capital Total', CapitalAmountDisplay::formatUsingSession($capitalTotal))
                 ->description('Suma de orígenes de fondos')
                 ->color($capitalTotal >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-banknotes'),

@@ -27,9 +27,9 @@ final class CapitalTotalWidgetTest extends TestCase
 
         Livewire::test(CapitalTotalWidget::class)
             ->call('toggleAmountVisibility')
-            ->assertDispatched(CapitalTotalWidget::AMOUNT_VISIBILITY_CHANGED_EVENT);
+            ->assertDispatched(CapitalAmountDisplay::VISIBILITY_CHANGED_EVENT);
 
-        $this->assertFalse((bool) session()->get(CapitalAmountDisplay::SESSION_KEY));
+        $this->assertFalse(CapitalAmountDisplay::isVisible());
     }
 
     public function test_total_updates_after_fund_origins_data_changed_event(): void

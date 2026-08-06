@@ -45,4 +45,33 @@ final class CapitalAmountDisplayTest extends TestCase
 
         $this->assertStringNotContainsString('100', CapitalAmountDisplay::formatUsingSession(100.0));
     }
+
+    public function test_ensure_default_visibility_sets_visible_when_missing(): void
+    {
+        Session::forget(CapitalAmountDisplay::SESSION_KEY);
+
+        CapitalAmountDisplay::ensureDefaultVisibility();
+
+        $this->assertTrue((bool) Session::get(CapitalAmountDisplay::SESSION_KEY));
+    }
+
+    public function test_ensure_default_visibility_does_not_overwrite_existing(): void
+    {
+        Session::put(CapitalAmountDisplay::SESSION_KEY, false);
+
+        CapitalAmountDisplay::ensureDefaultVisibility();
+
+        $this->assertFalse((bool) Session::get(CapitalAmountDisplay::SESSION_KEY));
+    }
+
+    public function test_toggle_flips_visibility_and_returns_new_state(): void
+    {
+        Session::put(CapitalAmountDisplay::SESSION_KEY, true);
+
+        $this->assertFalse(CapitalAmountDisplay::toggle());
+        $this->assertFalse(CapitalAmountDisplay::isVisible());
+
+        $this->assertTrue(CapitalAmountDisplay::toggle());
+        $this->assertTrue(CapitalAmountDisplay::isVisible());
+    }
 }

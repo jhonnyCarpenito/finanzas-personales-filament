@@ -8,12 +8,11 @@ use App\Models\FundOrigin;
 use App\Support\CapitalAmountDisplay;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\On;
 
 class CapitalTotalWidget extends Widget
 {
-    public const AMOUNT_VISIBILITY_CHANGED_EVENT = 'capital-total-visibility-changed';
+    public const AMOUNT_VISIBILITY_CHANGED_EVENT = CapitalAmountDisplay::VISIBILITY_CHANGED_EVENT;
 
     public const FUND_ORIGINS_DATA_CHANGED_EVENT = 'fund-origins-data-changed';
 
@@ -25,9 +24,7 @@ class CapitalTotalWidget extends Widget
 
     public function mount(): void
     {
-        if (! Session::has(CapitalAmountDisplay::SESSION_KEY)) {
-            Session::put(CapitalAmountDisplay::SESSION_KEY, true);
-        }
+        CapitalAmountDisplay::ensureDefaultVisibility();
     }
 
     #[On(self::FUND_ORIGINS_DATA_CHANGED_EVENT)]
@@ -43,8 +40,7 @@ class CapitalTotalWidget extends Widget
 
     public function toggleAmountVisibility(): void
     {
-        $visible = Session::get(CapitalAmountDisplay::SESSION_KEY, true);
-        Session::put(CapitalAmountDisplay::SESSION_KEY, ! $visible);
+        CapitalAmountDisplay::toggle();
 
         $this->dispatch(self::AMOUNT_VISIBILITY_CHANGED_EVENT);
     }
@@ -58,7 +54,7 @@ class CapitalTotalWidget extends Widget
 
     public function isAmountVisible(): bool
     {
-        return (bool) Session::get(CapitalAmountDisplay::SESSION_KEY, true);
+        return CapitalAmountDisplay::isVisible();
     }
 
     public function getDisplayValue(): string

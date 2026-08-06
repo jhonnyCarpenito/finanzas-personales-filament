@@ -10,6 +10,28 @@ final class CapitalAmountDisplay
 {
     public const SESSION_KEY = 'capital_total_amount_visible';
 
+    public const VISIBILITY_CHANGED_EVENT = 'capital-total-visibility-changed';
+
+    public static function ensureDefaultVisibility(): void
+    {
+        if (! Session::has(self::SESSION_KEY)) {
+            Session::put(self::SESSION_KEY, true);
+        }
+    }
+
+    public static function isVisible(): bool
+    {
+        return (bool) Session::get(self::SESSION_KEY, true);
+    }
+
+    public static function toggle(): bool
+    {
+        $visible = ! self::isVisible();
+        Session::put(self::SESSION_KEY, $visible);
+
+        return $visible;
+    }
+
     public static function format(float $amount, bool $visible): string
     {
         if ($visible) {
@@ -23,8 +45,6 @@ final class CapitalAmountDisplay
 
     public static function formatUsingSession(float $amount): string
     {
-        $visible = Session::get(self::SESSION_KEY, true);
-
-        return self::format($amount, (bool) $visible);
+        return self::format($amount, self::isVisible());
     }
 }
