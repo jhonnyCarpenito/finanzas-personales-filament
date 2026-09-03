@@ -32,7 +32,7 @@ final class TransactionFilterStatsOverview extends BaseWidget
 
     protected function getColumns(): int
     {
-        return 2;
+        return 3;
     }
 
     public static function canView(): bool
@@ -61,6 +61,7 @@ final class TransactionFilterStatsOverview extends BaseWidget
     protected function getStats(): array
     {
         $totals = $this->queryFilteredTotals();
+        $balance = $totals['income'] - $totals['expense'];
 
         return [
             Stat::make('Total Ingreso', CapitalAmountDisplay::formatUsingSession($totals['income']))
@@ -71,6 +72,10 @@ final class TransactionFilterStatsOverview extends BaseWidget
                 ->description('Según filtros actuales')
                 ->color('danger')
                 ->icon('heroicon-o-arrow-trending-down'),
+            Stat::make('Balance', CapitalAmountDisplay::formatUsingSession($balance))
+                ->description('Ingresos menos egresos')
+                ->color($balance >= 0 ? 'success' : 'danger')
+                ->icon('heroicon-o-scale'),
         ];
     }
 

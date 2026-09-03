@@ -226,7 +226,14 @@ class TransactionResource extends Resource
                             ->body('La transacción se duplicó correctamente.')
                             ->send();
                     }),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->slideOver()
+                    ->modalWidth('3xl')
+                    ->mutateFormDataUsing(function (array $data, Transaction $record): array {
+                        $data['user_id'] = $record->user_id;
+
+                        return $data;
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -277,7 +284,6 @@ class TransactionResource extends Resource
         return [
             'index' => Pages\ListTransactions::route('/'),
             'create' => Pages\CreateTransaction::route('/create'),
-            'edit' => Pages\EditTransaction::route('/{record}/edit'),
         ];
     }
 }

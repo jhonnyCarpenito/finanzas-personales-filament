@@ -45,4 +45,14 @@ class TransactionsEndToEndTest extends TestCase
 
         $response->assertOk();
     }
+
+    public function test_legacy_edit_page_url_returns_not_found(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $transaction = Transaction::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user);
+
+        $this->get('/app/transactions/'.$transaction->id.'/edit')->assertNotFound();
+    }
 }

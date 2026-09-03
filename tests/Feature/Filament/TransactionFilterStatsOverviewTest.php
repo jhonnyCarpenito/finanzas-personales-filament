@@ -78,8 +78,10 @@ final class TransactionFilterStatsOverviewTest extends TestCase
         ])
             ->assertSee('Total Ingreso')
             ->assertSee('Total Egreso')
+            ->assertSee('Balance')
             ->assertSee('$200.50')
             ->assertSee('$75.25')
+            ->assertSee('$125.25')
             ->assertDontSee('$999.00');
 
         Carbon::setTestNow();
@@ -112,6 +114,7 @@ final class TransactionFilterStatsOverviewTest extends TestCase
         ])
             ->assertSee('$0.00')
             ->assertSee('$40.00')
+            ->assertSee('$-40.00')
             ->assertDontSee('$150.00');
 
         Carbon::setTestNow();
@@ -143,6 +146,40 @@ final class TransactionFilterStatsOverviewTest extends TestCase
             ->assertDontSee('$320.00');
 
         $this->assertFalse(CapitalAmountDisplay::isVisible());
+
+        Carbon::setTestNow();
+    }
+
+    public function test_balance_stat_is_income_minus_expense_for_current_filters(): void
+    {
+        Carbon::setTestNow('2026-06-15 12:00:00');
+
+        $user = User::factory()->create(['is_admin' => false]);
+        $this->actingAs($user);
+
+        Transaction::factory()->income()->create([
+            'user_id' => $user->id,
+            'amount' => 80.00,
+            'date' => '2026-06-10',
+        ]);
+        Transaction::factory()->expense()->create([
+            'user_id' => $user->id,
+            'amount' => 120.00,
+            'date' => '2026-06-12',
+        ]);
+
+        Livewire::test(TransactionFilterStatsOverview::class, [
+            'tableFilters' => [
+                'month' => [
+                    'month' => '2026-06',
+                ],
+            ],
+        ])
+            ->assertSee('Balance')
+            ->assertSee('Ingresos menos egresos')
+            ->assertSee('$80.00')
+            ->assertSee('$120.00')
+            ->assertSee('$-40.00');
 
         Carbon::setTestNow();
     }

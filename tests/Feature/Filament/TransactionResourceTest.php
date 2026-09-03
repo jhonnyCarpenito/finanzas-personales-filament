@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament;
 
+use App\Enums\TransactionType;
 use App\Filament\Resources\TransactionResource;
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Tag;
@@ -172,5 +173,119 @@ class TransactionResourceTest extends TestCase
         $this->assertSame('98.50', $duplicate->amount);
         $this->assertSame(now()->format('Y-m-d'), $duplicate->date->toDateString());
         $this->assertEqualsCanonicalizing([$tagA->id, $tagB->id], $duplicate->tags()->pluck('tags.id')->all());
+    }
+
+    public function test_edit_page_is_not_registered(): void
+    {
+        $this->assertFalse(TransactionResource::hasPage('edit'));
+        $this->assertArrayNotHasKey('edit', TransactionResource::getPages());
+    }
+
+    public function test_edit_table_action_opens_a_modal_instead_of_a_page(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $this->actingAs($user);
+
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'date' => now()->format('Y-m-d'),
+            'concept' => 'Almuerzo',
+        ]);
+
+        $this->setFilamentPanel('app');
+
+        Livewire::test(ListTransactions::class)
+            ->set('tableFilters', [
+                'month' => [
+                    'month' => now()->format('Y-m'),
+                ],
+            ])
+            ->mountTableAction('edit', $transaction)
+            ->assertSet('mountedTableActions', ['edit'])
+            ->assertTableActionDataSet([
+                'concept' => 'Almuerzo',
+            ]);
+    }
+
+    public function test_edit_table_action_does_not_reassign_ownership_when_user_id_is_tampered(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $other = User::factory()->create(['is_admin' => false]);
+        $this->actingAs($user);
+
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'type' => TransactionType::Expense,
+            'amount' => 25.00,
+            'concept' => 'Taxi',
+            'date' => now()->format('Y-m-d'),
+        ]);
+
+        $this->setFilamentPanel('app');
+
+        Livewire::test(ListTransactions::class)
+            ->set('tableFilters', [
+                'month' => [
+                    'month' => now()->format('Y-m'),
+                ],
+            ])
+            ->callTableAction('edit', $transaction, data: [
+                'user_id' => $other->id,
+                'concept' => 'Taxi modificado',
+            ]);
+
+        $transaction->refresh();
+
+        $this->assertSame($user->id, $transaction->user_id);
+        $this->assertSame('Taxi modificado', $transaction->concept);
+    }
+
+    public function test_edit_table_action_updates_transaction_and_tags_from_modal(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        $this->actingAs($user);
+
+        $oldTag = Tag::query()->create([
+            'name' => 'Transporte',
+            'color' => 'blue',
+            'user_id' => $user->id,
+        ]);
+        $newTag = Tag::query()->create([
+            'name' => 'Hogar',
+            'color' => 'green',
+            'user_id' => $user->id,
+        ]);
+
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'type' => TransactionType::Expense,
+            'amount' => 40.00,
+            'concept' => 'Uber',
+            'date' => now()->format('Y-m-d'),
+        ]);
+        $transaction->tags()->sync([$oldTag->id]);
+
+        $this->setFilamentPanel('app');
+
+        Livewire::test(ListTransactions::class)
+            ->set('tableFilters', [
+                'month' => [
+                    'month' => now()->format('Y-m'),
+                ],
+            ])
+            ->callTableAction('edit', $transaction, data: [
+                'concept' => 'Supermercado',
+                'amount' => 125.50,
+                'type' => TransactionType::Expense->value,
+                'date' => now()->format('Y-m-d'),
+                'tags' => [$newTag->id],
+            ]);
+
+        $transaction->refresh();
+
+        $this->assertSame('Supermercado', $transaction->concept);
+        $this->assertSame('125.50', $transaction->amount);
+        $this->assertSame(TransactionType::Expense, $transaction->type);
+        $this->assertEqualsCanonicalizing([$newTag->id], $transaction->tags()->pluck('tags.id')->all());
     }
 }
