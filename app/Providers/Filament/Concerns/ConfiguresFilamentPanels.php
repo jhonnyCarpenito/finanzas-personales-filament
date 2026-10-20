@@ -24,6 +24,7 @@ trait ConfiguresFilamentPanels
     protected function configureShared(Panel $panel): Panel
     {
         return $panel
+            ->favicon(asset('favicon.svg') . '?v=2')
             ->login()
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()

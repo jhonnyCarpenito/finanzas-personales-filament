@@ -6,6 +6,9 @@
         "build": "vite build",
         "dev": "vite"
     },
+    "dependencies": {
+        "gsap": "^3.12.5"
+    },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",
